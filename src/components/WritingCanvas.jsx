@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 function WritingCanvas() {
   const contentRef = useRef(null);
   const [pageCount, setPageCount] = useState(1);
+
   const PAGE_HEIGHT = 912;
   const TOP_PADDING = 96;
 
@@ -32,21 +33,11 @@ function WritingCanvas() {
   const overlays = [];
 
   for (let i = 1; i <= pageCount; i++) {
-    if (i === 1) {
+    if (i > 1) {
       overlays.push(
         <div
           className="page-number"
-          style={{ top: `${TOP_PADDING}px`}}
-          key={`num-${i}`}
-        >
-          <span>{i}.</span>
-        </div>
-      );
-    } else {
-      overlays.push(
-        <div
-          className="page-number"
-          style={{ top: `${(i - 1) * PAGE_HEIGHT + TOP_PADDING}px`}}
+          style={{ top: `${(i - 1) * PAGE_HEIGHT + TOP_PADDING}px` }}
           key={`num-${i}`}
         >
           <span>{i}.</span>
@@ -55,7 +46,7 @@ function WritingCanvas() {
       overlays.push(
         <div
           className="page-break"
-          style={{ top: `${(i - 1) * PAGE_HEIGHT + TOP_PADDING }px` }}
+          style={{ top: `${(i - 1) * PAGE_HEIGHT + TOP_PADDING}px` }}
           key={`break-${i}`}
         />
       );

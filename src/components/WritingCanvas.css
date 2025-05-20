@@ -1,6 +1,6 @@
 .writing-canvas-container {
   width: 816px;
-  min-height: 1100px; 
+  min-height: 1100px;
   padding: 96px 96px 0 144px;
   background-color: white;
   font-family: Courier, monospace;
@@ -9,7 +9,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   position: relative;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .writing-canvas {
@@ -21,9 +21,10 @@
   padding: 0;
   text-align: left;
   display: block;
-  overflow: hidden; 
+  overflow: hidden;
   min-height: 912px;
   max-height: none;
+  padding: 0 0 48px 0;
 }
 
 .page-number {
@@ -34,7 +35,7 @@
   line-height: 1;
   color: #aaa;
   pointer-events: none;
-  
+
 }
 
 .page-break {
@@ -45,6 +46,5 @@
   border-top: 1px solid #aaa;
   width: 100%;
   pointer-events: none;
-  z-index: 2;
-  transform: translateY(-1px); 
+  opacity: 0.5;
 }
