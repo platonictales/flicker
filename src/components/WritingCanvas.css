@@ -22,14 +22,29 @@
   text-align: left;
   display: block;
   overflow: hidden; 
+  min-height: 912px;
+  max-height: none;
 }
 
 .page-number {
   position: absolute;
-  top: 48px;
-  right: 64px;
-  font-size: 0.8em;
+  top: 96px;
+  right: 16px;
+  font-size: 16px;
+  line-height: 1;
   color: #aaa;
   pointer-events: none;
   
+}
+
+.page-break {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid #aaa;
+  width: 100%;
+  pointer-events: none;
+  z-index: 2;
+  transform: translateY(-1px); 
 }
