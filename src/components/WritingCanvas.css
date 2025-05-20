@@ -3,7 +3,7 @@
   min-height: 1100px;
   padding: 96px 96px 0 144px;
   background-color: white;
-  font-family: Courier, monospace;
+  font-family:  "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;
   margin: 0 auto;
   box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -14,7 +14,8 @@
 
 .writing-canvas {
   outline: none;
-  font-size: 16px;
+  font-size: 12pt;
+  font-family:  "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;
   line-height: 1;
   white-space: pre-wrap;
   margin: 0;
@@ -25,13 +26,14 @@
   min-height: 912px;
   max-height: none;
   padding: 0 0 48px 0;
+  color: #000;
 }
 
 .page-number {
   position: absolute;
   top: 96px;
   right: 16px;
-  font-size: 16px;
+  font-size: 12pt;
   line-height: 1;
   color: #aaa;
   pointer-events: none;

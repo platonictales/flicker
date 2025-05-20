@@ -30,6 +30,10 @@ function WritingCanvas() {
     };
   }, []);
 
+  useEffect(() => {
+    contentRef.current?.focus();
+  }, []);
+
   const overlays = [];
 
   for (let i = 1; i <= pageCount; i++) {
@@ -61,7 +65,7 @@ function WritingCanvas() {
         contentEditable="true"
         className="writing-canvas"
         suppressContentEditableWarning={true}
-      ></div>
+      />
     </div>
   );
 }
