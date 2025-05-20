@@ -1,4 +1,5 @@
 import "./WritingCanvas.css";
+import { getPageOverlays } from "./getPageOverlays";
 import { useRef, useEffect, useState } from "react";
 
 function WritingCanvas() {
@@ -34,7 +35,7 @@ function WritingCanvas() {
     contentRef.current?.focus();
   }, []);
 
-  const overlays = [];
+  const overlays = getPageOverlays(pageCount, PAGE_HEIGHT, TOP_PADDING);
 
   for (let i = 1; i <= pageCount; i++) {
     if (i > 1) {
