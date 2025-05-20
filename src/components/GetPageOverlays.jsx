@@ -1,6 +1,6 @@
-import React from "react";
+import { PAGE_HEIGHT, TOP_PADDING } from "./constants";
 
-export function getPageOverlays(pageCount, PAGE_HEIGHT, TOP_PADDING) {
+export function getPageOverlays(pageCount) {
   const overlays = [];
   for (let i = 1; i <= pageCount; i++) {
     if (i > 1) {
