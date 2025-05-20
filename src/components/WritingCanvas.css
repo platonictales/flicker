@@ -1,0 +1,35 @@
+.writing-canvas-container {
+  width: 816px;
+  min-height: 1100px; 
+  padding: 96px 96px 0 144px;
+  background-color: white;
+  font-family: Courier, monospace;
+  margin: 0 auto;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden; 
+}
+
+.writing-canvas {
+  outline: none;
+  font-size: 16px;
+  line-height: 1;
+  white-space: pre-wrap;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  display: block;
+  overflow: hidden; 
+}
+
+.page-number {
+  position: absolute;
+  top: 48px;
+  right: 64px;
+  font-size: 0.8em;
+  color: #aaa;
+  pointer-events: none;
+  
+}
