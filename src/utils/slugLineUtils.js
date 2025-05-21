@@ -50,3 +50,11 @@ export function removeSluglineClass(currentNode) {
     el.classList.add("normal-text");
   }
 }
+
+export function isNodeEmpty(node) {
+  return !node.textContent || node.textContent.trim() === "";
+}
+
+export function getTextContentUpper(node) {
+  return (node.textContent || "").toUpperCase();
+}

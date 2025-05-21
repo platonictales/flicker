@@ -2,7 +2,7 @@ import "./WritingCanvas.css";
 import { getPageOverlays } from "./getPageOverlays";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
-import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass } from "../utils/slugLineUtils";
+import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
@@ -41,14 +41,16 @@ function WritingCanvas() {
 
     const range = selection.getRangeAt(0);
     const currentNode = range.startContainer;
-    // Remove all styles if the editor or line is empty
-    const isEmptyLine = !currentNode.textContent || currentNode.textContent.trim() === "";
-    if (isEmptyLine) {
+
+    if (isNodeEmpty(currentNode)) {
       removeInlineTextStyles(currentNode);
       return;
     }
-    const isSlugLine = sceneHeadings.includes((currentNode.textContent || "").toUpperCase());
-    const startsWithSlug = sceneHeadings.some(h => (currentNode.textContent || "").toUpperCase().startsWith(h));
+    
+    const textUpper = getTextContentUpper(currentNode);
+    const isSlugLine = sceneHeadings.includes(textUpper);
+    const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
+   
     if (isSlugLine) {
       replaceWithSluglineDiv(currentNode);
     } else if (startsWithSlug) {
