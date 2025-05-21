@@ -1,12 +1,13 @@
 import "./WritingCanvas.css";
+import { getPageOverlays } from "./getPageOverlays";
 import { useRef, useEffect, useState } from "react";
+import { PAGE_HEIGHT } from "./constants";
+import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
   const [pageCount, setPageCount] = useState(1);
-
-  const PAGE_HEIGHT = 912;
-  const TOP_PADDING = 96;
+  const sceneHeadings = ["INT.", "EXT.", "INT/EXT.", "EXT/INT."];
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -17,6 +18,7 @@ function WritingCanvas() {
     };
 
     updatePageCount();
+    contentRef.current?.focus();
 
     const ref = contentRef.current;
     if (ref) {
@@ -30,28 +32,35 @@ function WritingCanvas() {
     };
   }, []);
 
-  const overlays = [];
 
-  for (let i = 1; i <= pageCount; i++) {
-    if (i > 1) {
-      overlays.push(
-        <div
-          className="page-number"
-          style={{ top: `${(i - 1) * PAGE_HEIGHT + TOP_PADDING}px` }}
-          key={`num-${i}`}
-        >
-          <span>{i}.</span>
-        </div>
-      );
-      overlays.push(
-        <div
-          className="page-break"
-          style={{ top: `${(i - 1) * PAGE_HEIGHT + TOP_PADDING}px` }}
-          key={`break-${i}`}
-        />
-      );
+  const handleInput = (e) => {
+    const target = e.target;
+
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const currentNode = range.startContainer;
+
+    if (isNodeEmpty(currentNode)) {
+      removeInlineTextStyles(currentNode);
+      return;
+    }
+    
+    const textUpper = getTextContentUpper(currentNode);
+    const isSlugLine = sceneHeadings.includes(textUpper);
+    const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
+   
+    if (isSlugLine) {
+      replaceWithSluglineDiv(currentNode);
+    } else if (startsWithSlug) {
+      ensureSluglineClass(currentNode);
+    } else {
+      removeSluglineClass(currentNode);
     }
   }
+
+  const overlays = getPageOverlays(pageCount);
 
   return (
     <div className="writing-canvas-container">
@@ -61,7 +70,9 @@ function WritingCanvas() {
         contentEditable="true"
         className="writing-canvas"
         suppressContentEditableWarning={true}
-      ></div>
+        onInput={(e) => { handleInput(e) }}
+      // onKeyDown={(e) => { handlekeyDown(e) }}
+      />
     </div>
   );
 }
