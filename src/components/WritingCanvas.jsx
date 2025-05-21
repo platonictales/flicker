@@ -2,6 +2,7 @@ import "./WritingCanvas.css";
 import { getPageOverlays } from "./getPageOverlays";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
+import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass } from "../utils/slugLineUtils";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
@@ -40,26 +41,20 @@ function WritingCanvas() {
 
     const range = selection.getRangeAt(0);
     const currentNode = range.startContainer;
-    
-    if (
-      sceneHeadings.includes(
-        (currentNode.textContent || "").toUpperCase()
-      )
-    ) {
-      const boldNode = document.createElement("b");
-      boldNode.textContent = currentNode.textContent;
-      boldNode.style.textTransform = "uppercase";
-
-      if (currentNode.parentNode) {
-        currentNode.parentNode.replaceChild(boldNode, currentNode);
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.setStart(boldNode, 1);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        currentNode.textContent = currentNode.textContent.toUpperCase();
-      }
+    // Remove all styles if the editor or line is empty
+    const isEmptyLine = !currentNode.textContent || currentNode.textContent.trim() === "";
+    if (isEmptyLine) {
+      removeInlineTextStyles(currentNode);
+      return;
+    }
+    const isSlugLine = sceneHeadings.includes((currentNode.textContent || "").toUpperCase());
+    const startsWithSlug = sceneHeadings.some(h => (currentNode.textContent || "").toUpperCase().startsWith(h));
+    if (isSlugLine) {
+      replaceWithSluglineDiv(currentNode);
+    } else if (startsWithSlug) {
+      ensureSluglineClass(currentNode);
+    } else {
+      removeSluglineClass(currentNode);
     }
   }
 
@@ -74,7 +69,7 @@ function WritingCanvas() {
         className="writing-canvas"
         suppressContentEditableWarning={true}
         onInput={(e) => { handleInput(e) }}
-        onKeyDown={(e) => { handlekeyDown(e) }}
+      // onKeyDown={(e) => { handlekeyDown(e) }}
       />
     </div>
   );
