@@ -25,6 +25,11 @@
   color: #000;
 }
 
+.writing-canvas > div {
+  line-height: 1;
+  margin-bottom: 1em;
+}
+
 .slugline {
   font-weight: bold; 
   text-transform: uppercase; 

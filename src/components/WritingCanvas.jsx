@@ -3,6 +3,7 @@ import { getPageOverlays } from "./getPageOverlays";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
+import { ensureZeroWidthDiv } from "../utils/writingCanvasUtils";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
@@ -36,6 +37,8 @@ function WritingCanvas() {
   const handleInput = (e) => {
     const target = e.target;
 
+    if (ensureZeroWidthDiv(target)) return;
+
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
 
@@ -46,11 +49,11 @@ function WritingCanvas() {
       removeInlineTextStyles(currentNode);
       return;
     }
-    
+
     const textUpper = getTextContentUpper(currentNode);
     const isSlugLine = sceneHeadings.includes(textUpper);
     const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
-   
+
     if (isSlugLine) {
       replaceWithSluglineDiv(currentNode);
     } else if (startsWithSlug) {
@@ -71,8 +74,9 @@ function WritingCanvas() {
         className="writing-canvas"
         suppressContentEditableWarning={true}
         onInput={(e) => { handleInput(e) }}
-      // onKeyDown={(e) => { handlekeyDown(e) }}
-      />
+      >
+        <div>{'\u200B'}</div>
+      </div>
     </div>
   );
 }
