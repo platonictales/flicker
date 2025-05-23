@@ -5,6 +5,7 @@ import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
 import { ensureZeroWidthDiv } from "../utils/writingCanvasUtils";
 import { characterAnticipateDialogue } from "../utils/dialogueUtils";
+import { handleCorruptedCharacter } from "../utils/characterUtils";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
@@ -47,10 +48,14 @@ function WritingCanvas() {
       const isUppercase = text === text.toUpperCase() && /[A-Z]/.test(text);
       const isSlugLine = sceneHeadings.some(h => text.startsWith(h));
       const isCharacterName = isUppercase && !isSlugLine;
-      if(isCharacterName) {
+      if (isCharacterName) {
         e.preventDefault();
         characterAnticipateDialogue(currentNode, target, selection);
       }
+    }
+
+    if (e.key.length === 1) {
+      handleCorruptedCharacter();
     }
   }
 

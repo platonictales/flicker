@@ -19,6 +19,19 @@ export function removeInlineTextStyles(currentNode) {
   }
 }
 
+export function transformIntoActionNode(currentNode) {
+  let el = getParentElementNode(currentNode);
+  if (el) {
+    el.setAttribute("data-name", "action");
+    el.style.textTransform = "none";
+    el.style.fontWeight = "normal";
+    el.style.paddingLeft = "0";
+    el.style.paddingRight = "0";
+    el.style.margin = "1"
+
+  }
+}
+
 export function replaceWithSluglineDiv(currentNode) {
   const boldNode = document.createElement("div");
   boldNode.setAttribute("data-name", "slug-line");
