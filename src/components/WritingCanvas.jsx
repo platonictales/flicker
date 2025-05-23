@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
 import { ensureZeroWidthDiv } from "../utils/writingCanvasUtils";
-import { AnticipateDialogue } from "../utils/dialogueUtils";
+import { characterAnticipateDialogue } from "../utils/dialogueUtils";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
@@ -49,7 +49,7 @@ function WritingCanvas() {
       const isCharacterName = isUppercase && !isSlugLine;
       if(isCharacterName) {
         e.preventDefault();
-        AnticipateDialogue(currentNode, target, selection);
+        characterAnticipateDialogue(currentNode, target, selection);
       }
     }
   }
@@ -96,7 +96,7 @@ function WritingCanvas() {
         onInput={(e) => { handleInput(e) }}
         onKeyDown={(e) => { handleKeyDown(e) }}
       >
-        <div>{'\u200B'}</div>
+        <div data-name="action">{'\u200B'}</div>
       </div>
     </div>
   );

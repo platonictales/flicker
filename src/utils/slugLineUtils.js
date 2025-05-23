@@ -10,6 +10,7 @@ export function getParentElementNode(currentNode) {
 export function removeInlineTextStyles(currentNode) {
   let el = getParentElementNode(currentNode);
   if (el) {
+    el.setAttribute("data-name", "action");
     el.style.textTransform = "none";
     el.style.fontWeight = "normal";
     el.style.paddingLeft = "0";
@@ -20,6 +21,7 @@ export function removeInlineTextStyles(currentNode) {
 
 export function replaceWithSluglineDiv(currentNode) {
   const boldNode = document.createElement("div");
+  boldNode.setAttribute("data-name", "slug-line");
   boldNode.className = "slugline";
   boldNode.textContent = currentNode.textContent;
   boldNode.style.textTransform = "uppercase";
@@ -44,6 +46,7 @@ export function ensureSluglineClass(currentNode) {
   if (el && el.classList) {
     el.classList.remove("normal-text");
     el.classList.add("slugline");
+    el.setAttribute("data-name", "slug-line");
     el.style.textTransform = "uppercase";
     el.style.fontWeight = "bold";
   }
@@ -52,6 +55,7 @@ export function ensureSluglineClass(currentNode) {
 export function removeSluglineClass(currentNode) {
   let el = getParentElementNode(currentNode);
   if (el && el.classList && el.classList.contains("slugline")) {
+    el.setAttribute("data-name", "action");
     el.classList.remove("slugline");
     el.classList.add("normal-text");
   }
