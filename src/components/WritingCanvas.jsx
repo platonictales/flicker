@@ -4,7 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
 import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writingCanvasUtils";
-import { characterAnticipateDialogue } from "../utils/dialogueUtils";
+import { characterAnticipateDialogue, createParentheticals, autoInsertParentheses } from "../utils/dialogueUtils";
 import { handleCorruptedCharacter } from "../utils/characterUtils";
 
 function WritingCanvas() {
@@ -38,10 +38,16 @@ function WritingCanvas() {
   const handleKeyDown = (e) => {
     const target = e.target;
 
+    if (e.key === "(") {
+      autoInsertParentheses(e);
+      createParentheticals();
+      return;
+    }
+
     if (e.key === "Enter") {
       const selection = window.getSelection();
       if (!selection.rangeCount) return;
-
+      
       const range = selection.getRangeAt(0);
       const currentNode = range.startContainer;
       const text = currentNode.textContent || "";
