@@ -45,20 +45,19 @@ function WritingCanvas() {
       const text = currentNode.textContent || "";
       const isUppercase = text === text.toUpperCase() && /[A-Z]/.test(text);
       if(isUppercase) {
-        //move the current node to character's position
-        // add a new div in new line and place the caret inside it at a specific margin
         e.preventDefault();
-        // Add padding to the current node (the div where Enter was pressed)
+        
         if (currentNode.nodeType === Node.TEXT_NODE && currentNode.parentNode && currentNode.parentNode.nodeName === 'DIV') {
           currentNode.parentNode.style.paddingLeft = "2.2in";
           currentNode.parentNode.style.paddingRight = "0.5in";
+          currentNode.parentNode.style.marginBottom = "0";
         } else if (currentNode.nodeName === 'DIV') {
           currentNode.parentNode.style.paddingLeft = "2.2in";
           currentNode.parentNode.style.paddingRight = "0.5in";
+          currentNode.parentNode.style.marginBottom = "0";
         }
-        // Optionally, you can still create a new div for the new line if needed
         const newDiv = document.createElement("div");
-        newDiv.textContent = '\u200B'; // Zero-width space
+        newDiv.textContent = '\u200B';
         newDiv.style.paddingLeft = "1in";
         newDiv.style.paddingRight = "1.5in";
         target.appendChild(newDiv);

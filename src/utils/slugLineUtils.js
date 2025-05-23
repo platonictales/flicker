@@ -12,6 +12,8 @@ export function removeInlineTextStyles(currentNode) {
   if (el) {
     el.style.textTransform = "none";
     el.style.fontWeight = "normal";
+    el.style.paddingLeft = "0";
+    el.style.paddingRight = "0";
   }
 }
 
