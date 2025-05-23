@@ -14,6 +14,7 @@ export function removeInlineTextStyles(currentNode) {
     el.style.fontWeight = "normal";
     el.style.paddingLeft = "0";
     el.style.paddingRight = "0";
+    el.style.margin = "1"
   }
 }
 
@@ -22,9 +23,12 @@ export function replaceWithSluglineDiv(currentNode) {
   boldNode.className = "slugline";
   boldNode.textContent = currentNode.textContent;
   boldNode.style.textTransform = "uppercase";
-
   if (currentNode.parentNode) {
-    currentNode.parentNode.replaceChild(boldNode, currentNode);
+    if (currentNode.nodeType === Node.TEXT_NODE && currentNode.parentNode.nodeName === 'DIV') {
+      currentNode.parentNode.parentNode.replaceChild(boldNode, currentNode.parentNode);
+    } else {
+      currentNode.parentNode.replaceChild(boldNode, currentNode);
+    }
     const selection = window.getSelection();
     const range = document.createRange();
     range.setStart(boldNode, 1);
