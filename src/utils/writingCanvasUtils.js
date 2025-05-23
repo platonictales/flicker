@@ -25,3 +25,25 @@ export function ensureZeroWidthDiv(target) {
   }
   return false;
 }
+
+export function removeZeroWidthSpaceFromNode(currentNode, selection) {
+  if (
+    currentNode.nodeType === Node.TEXT_NODE &&
+    currentNode.textContent.includes('\u200B') &&
+    currentNode.textContent.length > 1
+  ) {
+    const caretOffset = selection.focusOffset;
+    const before = currentNode.textContent.slice(0, caretOffset);
+    const after = currentNode.textContent.slice(caretOffset);
+    const beforeClean = before.replace(/\u200B/g, "");
+    const afterClean = after.replace(/\u200B/g, "");
+    currentNode.textContent = beforeClean + afterClean;
+    const newOffset = beforeClean.length;
+    const sel = window.getSelection();
+    const r = document.createRange();
+    r.setStart(currentNode, newOffset);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+}

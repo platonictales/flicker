@@ -3,7 +3,7 @@ import { getPageOverlays } from "./getPageOverlays";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
-import { ensureZeroWidthDiv } from "../utils/writingCanvasUtils";
+import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writingCanvasUtils";
 import { characterAnticipateDialogue } from "../utils/dialogueUtils";
 import { handleCorruptedCharacter } from "../utils/characterUtils";
 
@@ -70,6 +70,8 @@ function WritingCanvas() {
     const range = selection.getRangeAt(0);
     const currentNode = range.startContainer;
 
+    removeZeroWidthSpaceFromNode(currentNode, selection);
+
     if (isNodeEmpty(currentNode)) {
       removeInlineTextStyles(currentNode);
       return;
@@ -78,7 +80,7 @@ function WritingCanvas() {
     const textUpper = getTextContentUpper(currentNode);
     const isSlugLine = sceneHeadings.includes(textUpper);
     const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
-
+    console.log("isSlugLine", isSlugLine, textUpper);
     if (isSlugLine) {
       replaceWithSluglineDiv(currentNode);
     } else if (startsWithSlug) {
