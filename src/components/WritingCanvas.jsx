@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
 import { ensureZeroWidthDiv } from "../utils/writingCanvasUtils";
+import { AnticipateDialogue } from "../utils/dialogueUtils";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
@@ -44,28 +45,11 @@ function WritingCanvas() {
       const currentNode = range.startContainer;
       const text = currentNode.textContent || "";
       const isUppercase = text === text.toUpperCase() && /[A-Z]/.test(text);
-      if(isUppercase) {
+      const isSlugLine = sceneHeadings.some(h => text.startsWith(h));
+      const isCharacterName = isUppercase && !isSlugLine;
+      if(isCharacterName) {
         e.preventDefault();
-        
-        if (currentNode.nodeType === Node.TEXT_NODE && currentNode.parentNode && currentNode.parentNode.nodeName === 'DIV') {
-          currentNode.parentNode.style.paddingLeft = "2.2in";
-          currentNode.parentNode.style.paddingRight = "0.5in";
-          currentNode.parentNode.style.marginBottom = "0";
-        } else if (currentNode.nodeName === 'DIV') {
-          currentNode.parentNode.style.paddingLeft = "2.2in";
-          currentNode.parentNode.style.paddingRight = "0.5in";
-          currentNode.parentNode.style.marginBottom = "0";
-        }
-        const newDiv = document.createElement("div");
-        newDiv.textContent = '\u200B';
-        newDiv.style.paddingLeft = "1in";
-        newDiv.style.paddingRight = "1.5in";
-        target.appendChild(newDiv);
-        const newRange = document.createRange();
-        newRange.selectNodeContents(newDiv);
-        newRange.collapse(false);
-        selection.removeAllRanges();
-        selection.addRange(newRange);
+        AnticipateDialogue(currentNode, target, selection);
       }
     }
   }
