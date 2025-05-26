@@ -7,9 +7,41 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
+import jsPDF from "jspdf";
+import React from "react";
+
+function TopMenuBar({ onExport }) {
+  return (
+    <div style={{
+      width: '100%',
+      color: '#fff',
+      padding: '0.5rem 1rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      position: 'sticky',
+      top: 0,
+      zIndex: 1000
+    }}>
+      <button onClick={onExport} style={{
+        background: "red",
+        color: '#fff',
+        border: 'none',
+        borderRadius: 4,
+        padding: '0.4rem 1.2rem',
+        fontWeight: 600,
+        cursor: 'pointer',
+        fontSize: '1rem',
+        marginLeft: 'auto'
+      }}>Export PDF</button>
+    </div>
+  );
+}
 
 function WritingCanvas() {
   const contentRef = useRef(null);
+  const [blocks, setBlocks] = useState([]);
+  console.log(blocks, "blocks in WritingCanvas");
   const [pageCount, setPageCount] = useState(1);
 
   useEffect(() => {
@@ -46,7 +78,7 @@ function WritingCanvas() {
     if (e.key === "Enter") {
       const selection = window.getSelection();
       if (!selection.rangeCount) return;
-      
+
       const range = selection.getRangeAt(0);
       let currentNode = range.startContainer;
       const text = currentNode.textContent || "";
@@ -67,8 +99,8 @@ function WritingCanvas() {
         e.preventDefault();
         transitionAnticipateAction(currentNode, target, selection);
       }
-      
-      if(name === "parentheticals"){
+
+      if (name === "parentheticals") {
         e.preventDefault();
         const parent = currentNode.parentNode;
         createDialogueDivAndFocus(parent, selection);
@@ -109,20 +141,87 @@ function WritingCanvas() {
     } else {
       removeSluglineClass(currentNode);
     }
+
+    const editor = e.target;
+    const newBlocks = Array.from(editor.children).map(div => ({
+      type: div.getAttribute('data-name'),
+      text: div.innerText
+    }));
+    setBlocks(newBlocks);
+  }
+
+  function generateScreenplayPDF(blocks) {
+    const doc = new jsPDF({ unit: 'in', format: 'letter' });
+    let y = 1; // Start 1 inch from the top
+    blocks.forEach(block => {
+      let text = block.text || " ";
+      let x = 1.5; // Default left margin in inches
+      let options = {};
+      switch (block.type) {
+        case 'slug-line':
+          doc.setFont('Courier', 'bold');
+          doc.setFontSize(12);
+          doc.text(text.toUpperCase(), x, y);
+          y += 0.4; // Extra space after slugline
+          break;
+        case 'action':
+          doc.setFont('Courier', 'normal');
+          doc.setFontSize(12);
+          doc.text(text, x, y, { maxWidth: 6.5 });
+          y += 0.4;
+          break;
+        case 'character':
+          doc.setFont('Courier', 'bold');
+          doc.setFontSize(12);
+          doc.text(text.toUpperCase(), 4.25, y, { align: 'center' });
+          y += 0.18; // Small space after character
+          break;
+        case 'parentheticals':
+          doc.setFont('Courier', 'normal'); // Keep normal font
+          doc.setFontSize(12);
+          doc.text(text.replace(/\s+/g, ' ').trim(), 2, y, { maxWidth: 4.5 }); // match dialogue block width
+          y += 0.18;
+          break;
+        case 'dialogue':
+          doc.setFont('Courier', 'normal');
+          doc.setFontSize(12);
+          doc.text(text, 2, y, { maxWidth: 4.5 });
+          y += 0.4;
+          break;
+        case 'transition':
+          doc.setFont('Courier', 'normal');
+          doc.setFontSize(12);
+          doc.text(text, 6.5, y, { align: 'right' });
+          y += 0.4;
+          break;
+        default:
+          doc.setFont('Courier', 'normal');
+          doc.setFontSize(12);
+          doc.text(text, x, y);
+          y += 0.4;
+          break;
+      }
+      if (y > 10) { // New page if past bottom margin
+        doc.addPage();
+        y = 1;
+      }
+    });
+    doc.save("screenplay.pdf");
   }
 
   const overlays = getPageOverlays(pageCount);
 
   return (
     <div className="writing-canvas-container">
+      <TopMenuBar onExport={() => generateScreenplayPDF(blocks)} />
       {overlays}
       <div
         ref={contentRef}
         contentEditable="true"
         className="writing-canvas"
         suppressContentEditableWarning={true}
-        onInput={(e) => { handleInput(e) }}
-        onKeyDown={(e) => { handleKeyDown(e) }}
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
       >
         <div data-name="action">{'\u200B'}</div>
       </div>

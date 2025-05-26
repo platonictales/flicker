@@ -47,3 +47,22 @@ export function removeZeroWidthSpaceFromNode(currentNode, selection) {
     sel.addRange(r);
   }
 }
+
+// Returns style object for each screenplay block type
+export function getBlockStyle(type) {
+  switch (type) {
+    case 'slug-line':
+      return { textTransform: 'uppercase', fontWeight: 'bold' };
+    case 'character':
+      return { paddingLeft: '2.2in', paddingRight: '0.5in', marginBottom: 0 };
+    case 'dialogue':
+      return { paddingLeft: '1in', paddingRight: '1.5in' };
+    case 'parentheticals':
+      return { paddingLeft: '1.6in', paddingRight: '2in', margin: 0 };
+    case 'transition':
+      return { paddingRight: '0in', textAlign: 'right' };
+    case 'action':
+    default:
+      return { paddingLeft: 0, paddingRight: 0 };
+  }
+}
