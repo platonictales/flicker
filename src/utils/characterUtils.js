@@ -1,6 +1,6 @@
 import { getParentElementNode, transformIntoActionNode } from "./slugLineUtils";
 
-export function handleCorruptedCharacter() {
+export function handleModifiedCharacter() {
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
   const range = selection.getRangeAt(0);
