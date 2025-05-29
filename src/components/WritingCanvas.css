@@ -62,3 +62,21 @@
   opacity: 0.5;
   transform: translateY(-1px); 
 }
+
+.top-menu-bar-icons {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.top-menu-bar:hover .top-menu-bar-icons {
+  opacity: 1;
+}
+
+.quick-menu {
+  color: #888;
+  display: flex;
+  position: fixed;
+  justify-content: flex-end;
+  top: 64px;
+  left: calc(50% + 424px);
+  z-index: 1000;
+}

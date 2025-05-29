@@ -7,32 +7,13 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
-import React from "react";
-import { PreviewButton } from "./Preview";
 import { generateScreenplayPDF } from "../utils/previewUtils";
+import QuickMenu from "./QuickMenu";
 
-function TopMenuBar({ onExport }) {
-  return (
-    <div style={{
-      width: '100%',
-      color: '#888',
-      padding: '0.5rem 1rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      position: 'sticky',
-      top: 0,
-      zIndex: 1000,
-    }}>
-      <PreviewButton onClick={onExport} />
-    </div>
-  );
-}
 
 function WritingCanvas() {
   const contentRef = useRef(null);
   const [blocks, setBlocks] = useState([]);
-  console.log(blocks, "blocks in WritingCanvas");
   const [pageCount, setPageCount] = useState(1);
 
   useEffect(() => {
@@ -47,6 +28,7 @@ function WritingCanvas() {
     contentRef.current?.focus();
 
     const ref = contentRef.current;
+    console.log("WritingCanvas ref:", ref);
     if (ref) {
       ref.addEventListener("input", updatePageCount);
     }
@@ -142,14 +124,14 @@ function WritingCanvas() {
   }
 
   const overlays = getPageOverlays(pageCount);
-
   return (
     <div style={{ display: "flex", flexDirection: "column"}}>
-      <TopMenuBar onExport={() => generateScreenplayPDF(blocks)} />
+      <QuickMenu onExport={() => generateScreenplayPDF(blocks)} />
 
       <div className="writing-canvas-container">
         {overlays}
         <div  
+          ref={contentRef}
           contentEditable="true"
           className="writing-canvas"
           suppressContentEditableWarning={true}
