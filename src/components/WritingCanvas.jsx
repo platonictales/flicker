@@ -7,9 +7,32 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
+import React from "react";
+import { PreviewButton } from "./Preview";
+import { generateScreenplayPDF } from "../utils/previewUtils";
+
+function TopMenuBar({ onExport }) {
+  return (
+    <div style={{
+      width: '100%',
+      color: '#888',
+      padding: '0.5rem 1rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      position: 'sticky',
+      top: 0,
+      zIndex: 1000,
+    }}>
+      <PreviewButton onClick={onExport} />
+    </div>
+  );
+}
 
 function WritingCanvas() {
   const contentRef = useRef(null);
+  const [blocks, setBlocks] = useState([]);
+  console.log(blocks, "blocks in WritingCanvas");
   const [pageCount, setPageCount] = useState(1);
 
   useEffect(() => {
@@ -46,7 +69,7 @@ function WritingCanvas() {
     if (e.key === "Enter") {
       const selection = window.getSelection();
       if (!selection.rangeCount) return;
-      
+
       const range = selection.getRangeAt(0);
       let currentNode = range.startContainer;
       const text = currentNode.textContent || "";
@@ -67,8 +90,8 @@ function WritingCanvas() {
         e.preventDefault();
         transitionAnticipateAction(currentNode, target, selection);
       }
-      
-      if(name === "parentheticals"){
+
+      if (name === "parentheticals") {
         e.preventDefault();
         const parent = currentNode.parentNode;
         createDialogueDivAndFocus(parent, selection);
@@ -109,22 +132,32 @@ function WritingCanvas() {
     } else {
       removeSluglineClass(currentNode);
     }
+
+    const editor = e.target;
+    const newBlocks = Array.from(editor.children).map(div => ({
+      type: div.getAttribute('data-name'),
+      text: div.innerText
+    }));
+    setBlocks(newBlocks);
   }
 
   const overlays = getPageOverlays(pageCount);
 
   return (
-    <div className="writing-canvas-container">
-      {overlays}
-      <div
-        ref={contentRef}
-        contentEditable="true"
-        className="writing-canvas"
-        suppressContentEditableWarning={true}
-        onInput={(e) => { handleInput(e) }}
-        onKeyDown={(e) => { handleKeyDown(e) }}
-      >
-        <div data-name="action">{'\u200B'}</div>
+    <div style={{ display: "flex", flexDirection: "column"}}>
+      <TopMenuBar onExport={() => generateScreenplayPDF(blocks)} />
+
+      <div className="writing-canvas-container">
+        {overlays}
+        <div  
+          contentEditable="true"
+          className="writing-canvas"
+          suppressContentEditableWarning={true}
+          onInput={handleInput}
+          onKeyDown={handleKeyDown}
+        >
+          <div data-name="action">{'\u200B'}</div>
+        </div>
       </div>
     </div>
   );
