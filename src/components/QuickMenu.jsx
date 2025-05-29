@@ -1,11 +1,12 @@
 import { PreviewButton } from "./Preview";
 import { FocusButton } from "./Focus";
+import { DiffuseButton } from "./Diffuse";
 
-function QuickMenu({ onExport }) {
+function QuickMenu({ onExport, onFocus, isFocusMode }) {
   return (
     <div className="quick-menu">
       <PreviewButton onClick={onExport} />
-      <FocusButton />
+      {isFocusMode? <FocusButton onClick={onFocus} /> : <DiffuseButton onClick={onFocus} />}
     </div>
   );
 }

@@ -15,6 +15,7 @@ function WritingCanvas() {
   const contentRef = useRef(null);
   const [blocks, setBlocks] = useState([]);
   const [pageCount, setPageCount] = useState(1);
+  const [focusMode, setFocusMode] = useState(false);
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -28,7 +29,6 @@ function WritingCanvas() {
     contentRef.current?.focus();
 
     const ref = contentRef.current;
-    console.log("WritingCanvas ref:", ref);
     if (ref) {
       ref.addEventListener("input", updatePageCount);
     }
@@ -39,6 +39,48 @@ function WritingCanvas() {
       }
     };
   }, []);
+
+  function enableFocusMode() {
+    setFocusMode(!focusMode);
+  }
+
+  const updateBlockOpacities = () => {
+    if (!contentRef.current) return;
+    const editor = contentRef.current;
+    const selection = window.getSelection();
+    let caretDiv = null;
+    if (selection && selection.rangeCount > 0) {
+      let node = selection.anchorNode;
+      while (node && node !== editor && node.nodeType !== 1) {
+        node = node.parentNode;
+      }
+      if (node && node !== editor && node.nodeType === 1 && node.hasAttribute && node.hasAttribute('data-name')) {
+        caretDiv = node;
+      }
+    }
+    Array.from(editor.children).forEach(div => {
+      div.style.opacity = (div === caretDiv) ? '1' : '0.3';
+    });
+  };
+
+  useEffect(() => {
+    if (focusMode) {
+      updateBlockOpacities();
+
+      const handler = () => updateBlockOpacities();
+      document.addEventListener('selectionchange', handler);
+      return () => {
+        document.removeEventListener('selectionchange', handler);
+      };
+    } else {
+      if (contentRef.current) {
+        console.log("Disabling focus mode", focusMode);
+        Array.from(contentRef.current.children).forEach(div => {
+          div.style.opacity = '1';
+        });
+      }
+    }
+  }, [focusMode]);
 
   const handleKeyDown = (e) => {
     const target = e.target;
@@ -125,12 +167,12 @@ function WritingCanvas() {
 
   const overlays = getPageOverlays(pageCount);
   return (
-    <div style={{ display: "flex", flexDirection: "column"}}>
-      <QuickMenu onExport={() => generateScreenplayPDF(blocks)} />
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <QuickMenu onExport={() => generateScreenplayPDF(blocks)} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
 
       <div className="writing-canvas-container">
         {overlays}
-        <div  
+        <div
           ref={contentRef}
           contentEditable="true"
           className="writing-canvas"

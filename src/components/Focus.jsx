@@ -1,8 +1,7 @@
-import React from "react";
-
-export function FocusButton() {
+export function FocusButton({ onClick }) {
   return (
     <button
+      onClick={onClick}
       style={{
         background: 'none',
         border: 'none',
