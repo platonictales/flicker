@@ -1,59 +1,74 @@
 import jsPDF from "jspdf";
 
 export function generateScreenplayPDF(blocks) {
+  console.log("Generating PDF with blocks:", blocks);
   const doc = new jsPDF({ unit: 'in', format: 'letter' });
   let y = 1; // Start 1 inch from the top
+  const lineHeight = 0.167; // Approximate line height in inches for 12pt font
   blocks.forEach(block => {
     let text = block.text || " ";
     let x = 1.5; // Default left margin in inches
-    let options = {};
+    let maxWidth = 6.5; // Default max width
+    let align = undefined;
+    let font = 'normal';
+    let fontSize = 12;
     switch (block.type) {
       case 'slug-line':
-        doc.setFont('Courier', 'bold');
-        doc.setFontSize(12);
-        doc.text(text.toUpperCase(), x, y);
-        y += 0.4; // Extra space after slugline
+        font = 'bold';
+        maxWidth = 6;
         break;
       case 'action':
-        doc.setFont('Courier', 'normal');
-        doc.setFontSize(12);
-        doc.text(text, x, y, { maxWidth: 6.5 });
-        y += 0.4;
+        font = 'normal';
+        maxWidth = 6;
         break;
       case 'character':
-        doc.setFont('Courier', 'bold');
-        doc.setFontSize(12);
-        doc.text(text.toUpperCase(), 4.25, y, { align: 'center' });
-        y += 0.18; // Small space after character
+        font = 'bold';
+        x = 4.25;
+        maxWidth = 6;
+        align = 'center';
         break;
       case 'parentheticals':
-        doc.setFont('Courier', 'normal'); // Keep normal font
-        doc.setFontSize(12);
-        doc.text(text.replace(/\s+/g, ' ').trim(), 2, y, { maxWidth: 4.5 }); // match dialogue block width
-        y += 0.18;
+        font = 'normal';
+        x = 2;
+        maxWidth = 4.5;
         break;
       case 'dialogue':
-        doc.setFont('Courier', 'normal');
-        doc.setFontSize(12);
-        doc.text(text, 2, y, { maxWidth: 4.5 });
-        y += 0.4;
+        font = 'normal';
+        x = 2;
+        maxWidth = 4.5;
         break;
       case 'transition':
-        doc.setFont('Courier', 'normal');
-        doc.setFontSize(12);
-        doc.text(text, 6.5, y, { align: 'right' });
-        y += 0.4;
+        font = 'normal';
+        x = 7.5;
+        maxWidth = 6;
+        align = 'right';
         break;
       default:
-        doc.setFont('Courier', 'normal');
-        doc.setFontSize(12);
-        doc.text(text, x, y);
-        y += 0.4;
+        font = 'normal';
+        maxWidth = 6;
         break;
     }
-    if (y > 10) { // New page if past bottom margin
-      doc.addPage();
-      y = 1;
+    doc.setFont('Courier', font);
+    doc.setFontSize(fontSize);
+    // Split text into lines that fit maxWidth
+    const lines = doc.splitTextToSize(text, maxWidth);
+    lines.forEach(line => {
+      if (align === 'center' || align === 'right') {
+        doc.text(line, x, y, { align });
+      } else {
+        doc.text(line, x, y);
+      }
+      y += lineHeight;
+      if (y > 10) { // New page if past bottom margin
+        doc.addPage();
+        y = 1;
+      }
+    });
+    // Add extra space after block (not after every line)
+    if (block.type === 'slug-line' || block.type === 'action' || block.type === 'dialogue' || block.type === 'transition' || block.type === 'default') {
+      y += lineHeight;
+    } else if (block.type === 'character' || block.type === 'parentheticals') {
+      y += 0;
     }
   });
   doc.save("screenplay.pdf");

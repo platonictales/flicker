@@ -7,8 +7,6 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
-import { PreviewButton } from "./Preview";
-import { FocusButton } from "./Focus";
 import { generateScreenplayPDF } from "../utils/previewUtils";
 import QuickMenu from "./QuickMenu";
 
