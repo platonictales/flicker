@@ -7,8 +7,9 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
-import { generateScreenplayPDF } from "../utils/previewUtils";
+import { generateScreenplayPDF, generateScreenplayPDFBlob } from "../utils/previewUtils";
 import QuickMenu from "./QuickMenu";
+import PDFPreviewModal from "./PDFPreviewModal";
 
 
 function WritingCanvas() {
@@ -16,6 +17,8 @@ function WritingCanvas() {
   const [blocks, setBlocks] = useState([]);
   const [pageCount, setPageCount] = useState(1);
   const [focusMode, setFocusMode] = useState(false);
+  const [showPDF, setShowPDF] = useState(false);
+  const [pdfBlob, setPdfBlob] = useState(null);
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -59,7 +62,7 @@ function WritingCanvas() {
       }
     }
     Array.from(editor.children).forEach(div => {
-      div.style.opacity = (div === caretDiv) ? '1' : '0.3';
+      div.style.opacity = (div === caretDiv) ? '1' : '0.2';
     });
   };
 
@@ -165,11 +168,17 @@ function WritingCanvas() {
     setBlocks(newBlocks);
   }
 
+  const handlePreview = () => {
+    const blob = generateScreenplayPDFBlob(blocks);
+    setPdfBlob(blob);
+    setShowPDF(true);
+  }
+
   const overlays = getPageOverlays(pageCount);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <QuickMenu onExport={() => generateScreenplayPDF(blocks)} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
-
+      <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
+      {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
       <div className="writing-canvas-container">
         {overlays}
         <div
