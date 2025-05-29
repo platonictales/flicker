@@ -10,19 +10,40 @@ export function getParentElementNode(currentNode) {
 export function removeInlineTextStyles(currentNode) {
   let el = getParentElementNode(currentNode);
   if (el) {
+    el.setAttribute("data-name", "action");
     el.style.textTransform = "none";
     el.style.fontWeight = "normal";
+    el.style.paddingLeft = "0";
+    el.style.paddingRight = "0";
+    el.style.margin = "1"
+  }
+}
+
+export function transformIntoActionNode(currentNode) {
+  let el = getParentElementNode(currentNode);
+  if (el) {
+    el.setAttribute("data-name", "action");
+    el.style.textTransform = "none";
+    el.style.fontWeight = "normal";
+    el.style.paddingLeft = "0";
+    el.style.paddingRight = "0";
+    el.style.margin = "1"
+
   }
 }
 
 export function replaceWithSluglineDiv(currentNode) {
   const boldNode = document.createElement("div");
+  boldNode.setAttribute("data-name", "slug-line");
   boldNode.className = "slugline";
   boldNode.textContent = currentNode.textContent;
   boldNode.style.textTransform = "uppercase";
-
   if (currentNode.parentNode) {
-    currentNode.parentNode.replaceChild(boldNode, currentNode);
+    if (currentNode.nodeType === Node.TEXT_NODE && currentNode.parentNode.nodeName === 'DIV') {
+      currentNode.parentNode.parentNode.replaceChild(boldNode, currentNode.parentNode);
+    } else {
+      currentNode.parentNode.replaceChild(boldNode, currentNode);
+    }
     const selection = window.getSelection();
     const range = document.createRange();
     range.setStart(boldNode, 1);
@@ -38,6 +59,7 @@ export function ensureSluglineClass(currentNode) {
   if (el && el.classList) {
     el.classList.remove("normal-text");
     el.classList.add("slugline");
+    el.setAttribute("data-name", "slug-line");
     el.style.textTransform = "uppercase";
     el.style.fontWeight = "bold";
   }
@@ -46,6 +68,7 @@ export function ensureSluglineClass(currentNode) {
 export function removeSluglineClass(currentNode) {
   let el = getParentElementNode(currentNode);
   if (el && el.classList && el.classList.contains("slugline")) {
+    el.setAttribute("data-name", "action");
     el.classList.remove("slugline");
     el.classList.add("normal-text");
   }

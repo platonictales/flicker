@@ -2,13 +2,15 @@ import "./WritingCanvas.css";
 import { getPageOverlays } from "./getPageOverlays";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
-import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper } from "../utils/slugLineUtils";
-import { ensureZeroWidthDiv } from "../utils/writingCanvasUtils";
+import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
+import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writingCanvasUtils";
+import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
+import { handleModifiedCharacter } from "../utils/characterUtils";
+import { sceneHeadings, transitions } from "./screenplayConstants";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
   const [pageCount, setPageCount] = useState(1);
-  const sceneHeadings = ["INT.", "EXT.", "INT/EXT.", "EXT/INT."];
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -33,6 +35,50 @@ function WritingCanvas() {
     };
   }, []);
 
+  const handleKeyDown = (e) => {
+    const target = e.target;
+
+    if (e.key === "(") {
+      autoInsertParentheses(e);
+      if (handleParentheticalTrigger()) return;
+    }
+
+    if (e.key === "Enter") {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      
+      const range = selection.getRangeAt(0);
+      let currentNode = range.startContainer;
+      const text = currentNode.textContent || "";
+      const isUppercase = text === text.toUpperCase() && /[A-Z]/.test(text);
+      const isSlugLine = sceneHeadings.some(h => text.startsWith(h));
+      const isTransition = transitions.some(t => text.startsWith(t));
+      const isCharacterName = isUppercase && !isSlugLine && !isTransition;
+
+      currentNode = getParentElementNode(currentNode);
+      const name = currentNode.getAttribute("data-name");
+
+      if (isCharacterName) {
+        e.preventDefault();
+        characterAnticipateDialogue(currentNode, target, selection);
+      }
+
+      if (isTransition) {
+        e.preventDefault();
+        transitionAnticipateAction(currentNode, target, selection);
+      }
+      
+      if(name === "parentheticals"){
+        e.preventDefault();
+        const parent = currentNode.parentNode;
+        createDialogueDivAndFocus(parent, selection);
+      }
+    }
+
+    if (e.key.length === 1) {
+      handleModifiedCharacter();
+    }
+  }
 
   const handleInput = (e) => {
     const target = e.target;
@@ -44,6 +90,8 @@ function WritingCanvas() {
 
     const range = selection.getRangeAt(0);
     const currentNode = range.startContainer;
+
+    removeZeroWidthSpaceFromNode(currentNode, selection);
 
     if (isNodeEmpty(currentNode)) {
       removeInlineTextStyles(currentNode);
@@ -74,8 +122,9 @@ function WritingCanvas() {
         className="writing-canvas"
         suppressContentEditableWarning={true}
         onInput={(e) => { handleInput(e) }}
+        onKeyDown={(e) => { handleKeyDown(e) }}
       >
-        <div>{'\u200B'}</div>
+        <div data-name="action">{'\u200B'}</div>
       </div>
     </div>
   );
