@@ -11,6 +11,7 @@
   width: 816px;
   box-sizing: border-box;
   padding: 96px 96px 0 144px;
+  padding-bottom: 60vh; /* Ensures caret can be centered even at the end */
   outline: none;
   font-size: 12pt;
   font-family:  "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;

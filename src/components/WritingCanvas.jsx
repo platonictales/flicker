@@ -1,5 +1,6 @@
 import "./WritingCanvas.css";
 import { getPageOverlays } from "./getPageOverlays";
+import { filterOverlaysByActivePage } from "../utils/overlayUtils";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
@@ -19,6 +20,7 @@ function WritingCanvas() {
   const [focusMode, setFocusMode] = useState(false);
   const [showPDF, setShowPDF] = useState(false);
   const [pdfBlob, setPdfBlob] = useState(null);
+  const [activePage, setActivePage] = useState(1);
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -41,6 +43,30 @@ function WritingCanvas() {
         ref.removeEventListener("input", updatePageCount);
       }
     };
+  }, []);
+
+  // Track caret position and update activePage
+  useEffect(() => {
+    const handler = () => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      let node = range.startContainer;
+      // Find the block div
+      while (node && node !== contentRef.current && node.nodeType !== 1) {
+        node = node.parentNode;
+      }
+      if (!node || node === contentRef.current) return;
+      // Get caret Y position relative to editor
+      const rect = node.getBoundingClientRect();
+      const editorRect = contentRef.current.getBoundingClientRect();
+      const caretY = rect.top - editorRect.top;
+      // Calculate page number (1-based)
+      const page = Math.floor(caretY / PAGE_HEIGHT) + 1;
+      setActivePage(page);
+    };
+    document.addEventListener('selectionchange', handler);
+    return () => document.removeEventListener('selectionchange', handler);
   }, []);
 
   function enableFocusMode() {
@@ -190,7 +216,9 @@ function WritingCanvas() {
     setShowPDF(true);
   }
 
-  const overlays = getPageOverlays(pageCount);
+  // Only show overlays for the active page
+  const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
