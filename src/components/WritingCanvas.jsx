@@ -1,5 +1,7 @@
 import "./WritingCanvas.css";
 import { getPageOverlays } from "./getPageOverlays";
+import { filterOverlaysByActivePage } from "../utils/overlayUtils";
+import { getFocusModeStyle, scrollCaretToCenter, setCaretToEnd } from "../utils/focusModeUtils";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
@@ -7,14 +9,18 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
-import { generateScreenplayPDF } from "../utils/previewUtils";
+import { generateScreenplayPDFBlob } from "../utils/previewUtils";
 import QuickMenu from "./QuickMenu";
-
+import PDFPreviewModal from "./PDFPreviewModal";
 
 function WritingCanvas() {
   const contentRef = useRef(null);
   const [blocks, setBlocks] = useState([]);
   const [pageCount, setPageCount] = useState(1);
+  const [focusMode, setFocusMode] = useState(false);
+  const [showPDF, setShowPDF] = useState(false);
+  const [pdfBlob, setPdfBlob] = useState(null);
+  const [activePage, setActivePage] = useState(1);
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -28,7 +34,6 @@ function WritingCanvas() {
     contentRef.current?.focus();
 
     const ref = contentRef.current;
-    console.log("WritingCanvas ref:", ref);
     if (ref) {
       ref.addEventListener("input", updatePageCount);
     }
@@ -39,6 +44,74 @@ function WritingCanvas() {
       }
     };
   }, []);
+
+  // Track caret position and update activePage
+  useEffect(() => {
+    const handler = () => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      let node = range.startContainer;
+      // Find the block div
+      while (node && node !== contentRef.current && node.nodeType !== 1) {
+        node = node.parentNode;
+      }
+      if (!node || node === contentRef.current) return;
+      // Get caret Y position relative to editor
+      const rect = node.getBoundingClientRect();
+      const editorRect = contentRef.current.getBoundingClientRect();
+      const caretY = rect.top - editorRect.top;
+      // Calculate page number (1-based)
+      const page = Math.floor(caretY / PAGE_HEIGHT) + 1;
+      setActivePage(page);
+    };
+    document.addEventListener('selectionchange', handler);
+    return () => document.removeEventListener('selectionchange', handler);
+  }, []);
+
+  function enableFocusMode() {
+    setFocusMode(!focusMode);
+  }
+
+  const updateBlockOpacities = () => {
+    if (!contentRef.current) return;
+    const editor = contentRef.current;
+    const selection = window.getSelection();
+    let caretDiv = null;
+    if (selection && selection.rangeCount > 0) {
+      let node = selection.anchorNode;
+      while (node && node !== editor && node.nodeType !== 1) {
+        node = node.parentNode;
+      }
+      if (node && node !== editor && node.nodeType === 1 && node.hasAttribute && node.hasAttribute('data-name')) {
+        caretDiv = node;
+      }
+    }
+    Array.from(editor.children).forEach(div => {
+      div.style.opacity = (div === caretDiv) ? '1' : '0.2';
+    });
+  };
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setCaretToEnd(contentRef.current);
+    }
+    if (focusMode) {
+      updateBlockOpacities();
+
+      const handler = () => updateBlockOpacities();
+      document.addEventListener('selectionchange', handler);
+      return () => {
+        document.removeEventListener('selectionchange', handler);
+      };
+    } else {
+      if (contentRef.current) {
+        Array.from(contentRef.current.children).forEach(div => {
+          div.style.opacity = '1';
+        });
+      }
+    }
+  }, [focusMode]);
 
   const handleKeyDown = (e) => {
     const target = e.target;
@@ -78,11 +151,11 @@ function WritingCanvas() {
         const parent = currentNode.parentNode;
         createDialogueDivAndFocus(parent, selection);
       }
-    }
 
-    if (e.key.length === 1) {
-      handleModifiedCharacter();
     }
+    if (focusMode) scrollCaretToCenter(0);
+
+    if (e.key.length === 1) handleModifiedCharacter();
   }
 
   const handleInput = (e) => {
@@ -123,17 +196,28 @@ function WritingCanvas() {
     setBlocks(newBlocks);
   }
 
-  const overlays = getPageOverlays(pageCount);
-  return (
-    <div style={{ display: "flex", flexDirection: "column"}}>
-      <QuickMenu onExport={() => generateScreenplayPDF(blocks)} />
+  const handlePreview = () => {
+    const blob = generateScreenplayPDFBlob(blocks);
+    setPdfBlob(blob);
+    setShowPDF(true);
+  }
 
+  // Only show overlays for the active page
+  const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
+
+  const focusModeStyle = getFocusModeStyle(focusMode);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
+      {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
       <div className="writing-canvas-container">
-        {overlays}
-        <div  
+        {!focusMode && overlays}
+        <div
           ref={contentRef}
           contentEditable="true"
           className="writing-canvas"
+          style={focusModeStyle}
           suppressContentEditableWarning={true}
           onInput={handleInput}
           onKeyDown={handleKeyDown}

@@ -1,7 +1,6 @@
 import jsPDF from "jspdf";
 
-export function generateScreenplayPDF(blocks) {
-  console.log("Generating PDF with blocks:", blocks);
+export function generateScreenplayPDFBlob(blocks) {
   const doc = new jsPDF({ unit: 'in', format: 'letter' });
   let y = 1; // Start 1 inch from the top
   const lineHeight = 0.167; // Approximate line height in inches for 12pt font
@@ -71,5 +70,7 @@ export function generateScreenplayPDF(blocks) {
       y += 0;
     }
   });
-  doc.save("screenplay.pdf");
+  return doc.output('blob');
 }
+
+export { generateScreenplayPDFBlob as generateScreenplayPDF };
