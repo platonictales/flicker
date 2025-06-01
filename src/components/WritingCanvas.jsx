@@ -158,7 +158,7 @@ function WritingCanvas() {
           while (node && node.nodeType !== 1) node = node.parentNode;
           if (node && node.scrollIntoView) {
             const rect = node.getBoundingClientRect();
-            const desiredY = window.innerHeight * 0.3; // 30% from top
+            const desiredY = window.innerHeight * 0.5; // 30% from top
             const delta = rect.top - desiredY;
             // Allow scrolling above the viewport (remove clamping)
             window.scrollBy({ top: delta, behavior: 'smooth' });
