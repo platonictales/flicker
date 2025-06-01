@@ -1,6 +1,7 @@
 import "./WritingCanvas.css";
 import { getPageOverlays } from "./getPageOverlays";
 import { filterOverlaysByActivePage } from "../utils/overlayUtils";
+import { getFocusModeStyle, scrollCaretToCenter, setCaretToEnd } from "../utils/focusModeUtils";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
@@ -8,10 +9,9 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
-import { generateScreenplayPDF, generateScreenplayPDFBlob } from "../utils/previewUtils";
+import { generateScreenplayPDFBlob } from "../utils/previewUtils";
 import QuickMenu from "./QuickMenu";
 import PDFPreviewModal from "./PDFPreviewModal";
-
 
 function WritingCanvas() {
   const contentRef = useRef(null);
@@ -93,6 +93,9 @@ function WritingCanvas() {
   };
 
   useEffect(() => {
+    if (contentRef.current) {
+      setCaretToEnd(contentRef.current);
+    }
     if (focusMode) {
       updateBlockOpacities();
 
@@ -103,7 +106,6 @@ function WritingCanvas() {
       };
     } else {
       if (contentRef.current) {
-        console.log("Disabling focus mode", focusMode);
         Array.from(contentRef.current.children).forEach(div => {
           div.style.opacity = '1';
         });
@@ -150,26 +152,10 @@ function WritingCanvas() {
         createDialogueDivAndFocus(parent, selection);
       }
 
-      // --- Keep caret at a fixed height in viewport after Enter ---
-      setTimeout(() => {
-        const sel = window.getSelection();
-        if (sel && sel.rangeCount > 0) {
-          let node = sel.anchorNode;
-          while (node && node.nodeType !== 1) node = node.parentNode;
-          if (node && node.scrollIntoView) {
-            const rect = node.getBoundingClientRect();
-            const desiredY = window.innerHeight * 0.5; // 30% from top
-            const delta = rect.top - desiredY;
-            // Allow scrolling above the viewport (remove clamping)
-            window.scrollBy({ top: delta, behavior: 'smooth' });
-          }
-        }
-      }, 0);
     }
+    if (focusMode) scrollCaretToCenter(0);
 
-    if (e.key.length === 1) {
-      handleModifiedCharacter();
-    }
+    if (e.key.length === 1) handleModifiedCharacter();
   }
 
   const handleInput = (e) => {
@@ -219,16 +205,19 @@ function WritingCanvas() {
   // Only show overlays for the active page
   const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
 
+  const focusModeStyle = getFocusModeStyle(focusMode);
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
       {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
       <div className="writing-canvas-container">
-        {overlays}
+        {!focusMode && overlays}
         <div
           ref={contentRef}
           contentEditable="true"
           className="writing-canvas"
+          style={focusModeStyle}
           suppressContentEditableWarning={true}
           onInput={handleInput}
           onKeyDown={handleKeyDown}

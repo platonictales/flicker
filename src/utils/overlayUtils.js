@@ -1,4 +1,3 @@
-// Utility to filter overlays for the active page
 export function filterOverlaysByActivePage(overlays, activePage) {
   return overlays.filter(overlay => {
     if (!overlay || !overlay.key) return false;
