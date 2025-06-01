@@ -19,8 +19,7 @@ export function scrollCaretToCenter(delay = 0) {
   }, delay);
 }
 
-export const FOCUS_MODE_PADDING_TOP = '40vh';
-export const FOCUS_MODE_PADDING_BOTTOM = '80vh';
+import { FOCUS_MODE_PADDING_TOP, FOCUS_MODE_PADDING_BOTTOM } from '../components/constants';
 
 export function getFocusModeStyle(focusMode) {
   return {
