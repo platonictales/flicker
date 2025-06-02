@@ -22,6 +22,11 @@
   justify-content: center;
 }
 
+.container--no-padding {
+  padding-top: 0 !important;
+  overflow: hidden;
+}
+
 @font-face {
   font-family: 'Courier Prime Sans';
   src: url('./assets/fonts/Courier Prime Sans.ttf') format('truetype');
@@ -52,4 +57,8 @@
 
 body {
   font-family: 'Courier Prime Sans', monospace;
+}
+
+body.opening-screen-no-scroll {
+  overflow: hidden;
 }
