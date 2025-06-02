@@ -37,3 +37,31 @@ export function setCaretToEnd(el) {
   sel.removeAllRanges();
   sel.addRange(range);
 }
+
+/**
+ * Sets opacity for all block divs in the editor, making only the caret's block fully opaque.
+ * @param {HTMLElement} editor - The contentEditable editor element.
+ */
+export function updateBlockOpacities(editor) {
+  if (!editor) return;
+  const selection = window.getSelection();
+  let caretDiv = null;
+  if (selection && selection.rangeCount > 0) {
+    let node = selection.anchorNode;
+    while (node && node !== editor && node.nodeType !== 1) {
+      node = node.parentNode;
+    }
+    if (
+      node &&
+      node !== editor &&
+      node.nodeType === 1 &&
+      node.hasAttribute &&
+      node.hasAttribute('data-name')
+    ) {
+      caretDiv = node;
+    }
+  }
+  Array.from(editor.children).forEach(div => {
+    div.style.opacity = div === caretDiv ? '1' : '0.2';
+  });
+}
