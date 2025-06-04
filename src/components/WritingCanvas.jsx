@@ -1,7 +1,7 @@
 import "./WritingCanvas.css";
 import { getPageOverlays } from "./getPageOverlays";
 import { filterOverlaysByActivePage } from "../utils/overlayUtils";
-import { getFocusModeStyle, scrollCaretToCenter, setCaretToEnd } from "../utils/focusModeUtils";
+import { getFocusModeStyle, scrollCaretToCenter, setCaretToEnd, updateBlockOpacities } from "../utils/focusModeUtils";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
@@ -73,33 +73,14 @@ function WritingCanvas() {
     setFocusMode(!focusMode);
   }
 
-  const updateBlockOpacities = () => {
-    if (!contentRef.current) return;
-    const editor = contentRef.current;
-    const selection = window.getSelection();
-    let caretDiv = null;
-    if (selection && selection.rangeCount > 0) {
-      let node = selection.anchorNode;
-      while (node && node !== editor && node.nodeType !== 1) {
-        node = node.parentNode;
-      }
-      if (node && node !== editor && node.nodeType === 1 && node.hasAttribute && node.hasAttribute('data-name')) {
-        caretDiv = node;
-      }
-    }
-    Array.from(editor.children).forEach(div => {
-      div.style.opacity = (div === caretDiv) ? '1' : '0.2';
-    });
-  };
-
   useEffect(() => {
     if (contentRef.current) {
       setCaretToEnd(contentRef.current);
     }
     if (focusMode) {
-      updateBlockOpacities();
+      updateBlockOpacities(contentRef.current);
 
-      const handler = () => updateBlockOpacities();
+      const handler = () => updateBlockOpacities(contentRef.current);
       document.addEventListener('selectionchange', handler);
       return () => {
         document.removeEventListener('selectionchange', handler);
