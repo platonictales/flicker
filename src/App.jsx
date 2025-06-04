@@ -2,9 +2,11 @@ import "./App.css";
 import WritingCanvas from "./components/WritingCanvas";
 import OpeningScreen from "./components/OpeningScreen";
 import React, { useState, useEffect } from "react";
+import { invoke } from '@tauri-apps/api/core';
 
 function App() {
   const [showCanvas, setShowCanvas] = useState(false);
+  const [docId, setDocId] = useState(null);
 
   // Prevent body scroll on openingscreen
   useEffect(() => {
@@ -18,8 +20,14 @@ function App() {
     };
   }, [showCanvas]);
 
-  const handleNew = () => {
-    setShowCanvas(true);
+  const handleNew = async () => {
+    try {
+      const newDocId = await invoke('generate_unique_doc_id');
+      setDocId(newDocId);
+      setShowCanvas(true);
+    } catch (e) {
+      alert('Failed to create new document: ' + e);
+    }
   };
   const handleOpen = () => {
     alert("Open functionality is not implemented yet!"); // Placeholder for "Open"
@@ -27,7 +35,7 @@ function App() {
   return (
     <main className={`container${showCanvas ? '' : ' container--no-padding'}`}>
       {showCanvas ? (
-        <WritingCanvas />
+        docId && <WritingCanvas docId={docId} />
       ) : (
         <OpeningScreen onNew={handleNew} onOpen={handleOpen} />
       )}

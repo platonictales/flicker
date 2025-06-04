@@ -12,8 +12,9 @@ import { sceneHeadings, transitions } from "./screenplayConstants";
 import { generateScreenplayPDFBlob } from "../utils/previewUtils";
 import QuickMenu from "./QuickMenu";
 import PDFPreviewModal from "./PDFPreviewModal";
+import { useAutoSaveBlocks } from '../utils/saveUtils';
 
-function WritingCanvas() {
+function WritingCanvas({ docId }) {
   const contentRef = useRef(null);
   const [blocks, setBlocks] = useState([]);
   const [pageCount, setPageCount] = useState(1);
@@ -21,6 +22,8 @@ function WritingCanvas() {
   const [showPDF, setShowPDF] = useState(false);
   const [pdfBlob, setPdfBlob] = useState(null);
   const [activePage, setActivePage] = useState(1);
+  const filename = 'screenplay';
+  useAutoSaveBlocks(blocks, docId);
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -94,6 +97,8 @@ function WritingCanvas() {
     }
   }, [focusMode]);
 
+  // Debounced save on Enter key
+  const enterSaveTimeout = useRef();
   const handleKeyDown = (e) => {
     const target = e.target;
 
@@ -133,6 +138,12 @@ function WritingCanvas() {
         createDialogueDivAndFocus(parent, selection);
       }
 
+      clearTimeout(enterSaveTimeout.current);
+      enterSaveTimeout.current = setTimeout(() => {
+        import('@tauri-apps/api/core').then(({ invoke }) => {
+          invoke('auto_save_blocks', { blocks, docId });
+        });
+      }, 500);
     }
     if (focusMode) scrollCaretToCenter(0);
 
