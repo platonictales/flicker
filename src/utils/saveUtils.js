@@ -3,7 +3,6 @@ import { invoke } from '@tauri-apps/api/core';
 
 // Debounced auto-save hook
 export function useAutoSaveBlocks(blocks, docId) {
-  console.log("Hello")
   const timeout = useRef();
   useEffect(() => {
     if (!blocks || !docId) return;
