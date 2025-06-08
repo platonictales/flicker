@@ -2,9 +2,13 @@ import "./App.css";
 import WritingCanvas from "./components/WritingCanvas";
 import OpeningScreen from "./components/OpeningScreen";
 import React, { useState, useEffect } from "react";
+import { invoke } from '@tauri-apps/api/core';
+import { extractDocId } from './utils/saveUtils';
 
 function App() {
   const [showCanvas, setShowCanvas] = useState(false);
+  const [docId, setDocId] = useState(null);
+  const [loadedBlocks, setLoadedBlocks] = useState(null);
 
   // Prevent body scroll on openingscreen
   useEffect(() => {
@@ -18,19 +22,41 @@ function App() {
     };
   }, [showCanvas]);
 
-  const handleNew = () => {
-    setShowCanvas(true);
+  const handleNew = async () => {
+    try {
+      const newDocId = await invoke('generate_unique_doc_id');
+      setDocId(newDocId);
+      setShowCanvas(true);
+    } catch (e) {
+      alert('Failed to create new document: ' + e);
+    }
   };
-  const handleOpen = () => {
-    alert("Open functionality is not implemented yet!"); // Placeholder for "Open"
+
+  const handleOpen = async () => {
+    try {
+      const [filePath, content] = await invoke('open_screenplay_file');
+      if (filePath && content) {
+        const fileName = extractDocId(filePath);
+        setDocId(fileName);
+        setLoadedBlocks(JSON.parse(content));
+        setShowCanvas(true);
+      } else {
+        alert("No file selected.");
+      }
+    } catch (error) {
+      alert("Failed to open file: " + error);
+    }
   };
+
+  let content;
+  if (showCanvas && docId) {
+    content = <WritingCanvas docId={docId} loadedBlocks={loadedBlocks} />;
+  } else {
+    content = <OpeningScreen onNew={handleNew} onOpen={handleOpen} />;
+  }
   return (
     <main className={`container${showCanvas ? '' : ' container--no-padding'}`}>
-      {showCanvas ? (
-        <WritingCanvas />
-      ) : (
-        <OpeningScreen onNew={handleNew} onOpen={handleOpen} />
-      )}
+      {content}
     </main>
   );
 }

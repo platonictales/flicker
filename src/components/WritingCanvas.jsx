@@ -12,15 +12,18 @@ import { sceneHeadings, transitions } from "./screenplayConstants";
 import { generateScreenplayPDFBlob } from "../utils/previewUtils";
 import QuickMenu from "./QuickMenu";
 import PDFPreviewModal from "./PDFPreviewModal";
+import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
 
-function WritingCanvas() {
+function WritingCanvas({ docId, loadedBlocks }) {
   const contentRef = useRef(null);
-  const [blocks, setBlocks] = useState([]);
+  const [blocks, setBlocks] = useState(loadedBlocks || []);
   const [pageCount, setPageCount] = useState(1);
   const [focusMode, setFocusMode] = useState(false);
   const [showPDF, setShowPDF] = useState(false);
   const [pdfBlob, setPdfBlob] = useState(null);
   const [activePage, setActivePage] = useState(1);
+
+  useAutoSaveBlocks(blocks, docId);
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -44,8 +47,16 @@ function WritingCanvas() {
       }
     };
   }, []);
+  
+  useEffect(() => {
+    if (loadedBlocks && loadedBlocks.length > 0) {
+      setBlocks(loadedBlocks);
+      if (contentRef.current) {
+        contentRef.current.innerHTML = loadedBlocks.map(renderBlockDiv).join("");
+      }
+    }
+  }, [loadedBlocks]);
 
-  // Track caret position and update activePage
   useEffect(() => {
     const handler = () => {
       const sel = window.getSelection();
@@ -94,6 +105,8 @@ function WritingCanvas() {
     }
   }, [focusMode]);
 
+  // Debounced save on Enter key
+  const enterSaveTimeout = useRef();
   const handleKeyDown = (e) => {
     const target = e.target;
 
@@ -133,6 +146,12 @@ function WritingCanvas() {
         createDialogueDivAndFocus(parent, selection);
       }
 
+      clearTimeout(enterSaveTimeout.current);
+      enterSaveTimeout.current = setTimeout(() => {
+        import('@tauri-apps/api/core').then(({ invoke }) => {
+          invoke('auto_save_blocks', { blocks, docId });
+        });
+      }, 500);
     }
     if (focusMode) scrollCaretToCenter(0);
 
@@ -203,7 +222,7 @@ function WritingCanvas() {
           onInput={handleInput}
           onKeyDown={handleKeyDown}
         >
-          <div data-name="action">{'\u200B'}</div>
+          {(!loadedBlocks || loadedBlocks.length === 0) && <div data-name="action">{'\u200B'}</div>}
         </div>
       </div>
     </div>
