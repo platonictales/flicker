@@ -34,6 +34,8 @@ function App() {
     try {
       const [filePath, content] = await invoke('open_screenplay_file');
       if (filePath && content) {
+        const fileName = filePath.split(/[\\/]/).pop();
+
         setDocId(filePath);
         // If you want to load blocks, add setLoadedBlocks(JSON.parse(content));
         setShowCanvas(true);
