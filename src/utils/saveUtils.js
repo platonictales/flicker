@@ -15,7 +15,16 @@ export function useAutoSaveBlocks(blocks, docId) {
   }, [blocks, docId]);
 }
 
-// // Explicit save to file (can be used for Save As, etc)
-// export function saveBlocksToFile(blocks, filename, docId) {
-//   return invoke('save_blocks_to_file', { blocks, filename, doc_id: docId });
-// }
+export function extractDocId(filePath) {
+  return filePath
+    .split(/[\\/]/)
+    .pop()
+    .replace(/^autosave_/, "")
+    .replace(/\.json$/, "");
+}
+
+export const renderBlockDiv = (block) =>
+  `<div data-name="${block.type || "action"}" class="${block.type || "action"}">${block.text
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>")}</div>`;

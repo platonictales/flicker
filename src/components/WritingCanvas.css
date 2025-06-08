@@ -1,7 +1,7 @@
 .writing-canvas-container {
   min-height: 1100px;
   background-color: white;
-  font-family:  "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;
+  font-family: "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;
   margin: 0 auto;
   position: relative;
   overflow: hidden;
@@ -13,7 +13,7 @@
   padding: 96px 96px 0 144px;
   outline: none;
   font-size: 12pt;
-  font-family:  "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;
+  font-family: "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;
   line-height: 1;
   white-space: pre-wrap;
   margin: 0;
@@ -25,14 +25,9 @@
   color: #000;
 }
 
-.writing-canvas > div {
+.writing-canvas>div {
   line-height: 1;
   margin-bottom: 1em;
-}
-
-.slugline {
-  font-weight: bold; 
-  text-transform: uppercase; 
 }
 
 .normal-text {
@@ -60,13 +55,14 @@
   width: 100%;
   pointer-events: none;
   opacity: 0.5;
-  transform: translateY(-1px); 
+  transform: translateY(-1px);
 }
 
 .top-menu-bar-icons {
   opacity: 0;
   transition: opacity 0.2s;
 }
+
 .top-menu-bar:hover .top-menu-bar-icons {
   opacity: 1;
 }
@@ -79,4 +75,42 @@
   top: 64px;
   left: calc(50% + 424px);
   z-index: 1000;
+}
+
+.character {
+  text-transform: uppercase;
+  padding-left: 2.2in;
+  padding-right: 0.5in;
+  margin-bottom: 0 !important;
+}
+
+.parentheticals {
+  text-transform: none;
+  font-weight: normal;
+  padding-left: 1.6in;
+  padding-right: 2in;
+  margin-bottom: 0 !important;
+}
+
+.slug-line,
+.slugline {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.dialogue {
+  padding-left: 1in;
+  padding-right: 1.5in;
+}
+
+.action {
+  padding-left: 0;
+  padding-right: 0;
+  margin-bottom: 1em;
+}
+
+.transition {
+  padding-right: 0in;
+  margin-bottom: 1em;
+  text-align: right;
 }
