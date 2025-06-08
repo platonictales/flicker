@@ -29,9 +29,22 @@ function App() {
       alert('Failed to create new document: ' + e);
     }
   };
-  const handleOpen = () => {
-    alert("Open functionality is not implemented yet!"); // Placeholder for "Open"
+  
+  const handleOpen = async () => {
+    try {
+      const [filePath, content] = await invoke('open_screenplay_file');
+      if (filePath && content) {
+        setDocId(filePath);
+        // If you want to load blocks, add setLoadedBlocks(JSON.parse(content));
+        setShowCanvas(true);
+      } else {
+        alert("No file selected.");
+      }
+    } catch (error) {
+      alert("Failed to open file: " + error);
+    }
   };
+
   return (
     <main className={`container${showCanvas ? '' : ' container--no-padding'}`}>
       {showCanvas ? (

@@ -18,6 +18,31 @@ pub struct Block {
     pub r#type: String,
     pub text: String,
 }
+use tauri_plugin_dialog::DialogExt;
+
+#[tauri::command]
+async fn open_screenplay_file(app: tauri::AppHandle) -> Result<(String, String), String> {
+    use std::sync::mpsc::channel;
+    use std::fs;
+
+    let (tx, rx) = channel();
+    app.dialog().file().pick_file(move |file_path| {
+        if let Some(path) = file_path.and_then(|fp| fp.as_path().map(|p| p.to_path_buf())) {
+            let path_str = path.display().to_string();
+            match fs::read_to_string(&path) {
+                Ok(content) => {
+                    let _ = tx.send(Ok((path_str, content)));
+                }
+                Err(e) => {
+                    let _ = tx.send(Err(format!("Failed to read file: {}", e)));
+                }
+            }
+        } else {
+            let _ = tx.send(Err("No file selected".to_string()));
+        }
+    });
+    rx.recv().unwrap_or_else(|_| Err("Dialog cancelled".to_string()))
+}
 
 #[tauri::command]
 fn auto_save_blocks(blocks: Vec<Block>, doc_id: String) -> Result<(), String> {
@@ -67,7 +92,8 @@ fn generate_unique_doc_id() -> Result<String, String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, auto_save_blocks, generate_unique_doc_id])
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![greet, auto_save_blocks, generate_unique_doc_id, open_screenplay_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
