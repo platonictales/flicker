@@ -13,6 +13,7 @@ import { generateScreenplayPDFBlob } from "../utils/previewUtils";
 import QuickMenu from "./QuickMenu";
 import PDFPreviewModal from "./PDFPreviewModal";
 import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
+import { DockRightButton } from "./dockRight";
 
 function WritingCanvas({ docId, loadedBlocks }) {
   const contentRef = useRef(null);
@@ -23,7 +24,11 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const [showPDF, setShowPDF] = useState(false);
   const [pdfBlob, setPdfBlob] = useState(null);
   const [activePage, setActivePage] = useState(1);
+  const [dockActive, setDocActive] = useState(true);
 
+  function enableSideDock() {
+    setDocActive(!dockActive);
+  }
   useAutoSaveBlocks(blocks, docId);
 
   useEffect(() => {
@@ -48,7 +53,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
       }
     };
   }, []);
-  
+
   useEffect(() => {
     if (loadedBlocks && loadedBlocks.length > 0) {
       setBlocks(loadedBlocks);
@@ -210,20 +215,26 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   // Extract sluglines for sidenav
   const sluglines = (blocks || []).filter(b => b.type === "slug-line");
-
   return (
     <div className="writing-canvas-root">
       {/* Sidenav with sluglines */}
-      <nav className="sidenav">
-        <h4>Scenes</h4>
-        <ul>
-          {sluglines.map((block, idx) => (
-            <li key={idx}>{block.text}</li>
-          ))}
-        </ul>
-      </nav>
+      <div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: " #f5f5f5" }}>
+          <DockRightButton onClick={() => enableSideDock()} />
+        </div>
+        {dockActive &&
+          <nav className="sidenav">
+
+            <ul>
+              {sluglines.map((block, idx) => (
+                <li key={idx}>{block.text}</li>
+              ))}
+            </ul>
+          </nav>
+        }
+      </div>
       {/* Main editor area */}
-      <div className="main-content">
+<div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
         <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
         {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
         <div className="writing-canvas-container" ref={containerRef}>

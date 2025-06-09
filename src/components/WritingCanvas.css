@@ -84,11 +84,11 @@ body {
 
 .quick-menu {
   color: #888;
+  background: #ffffff;
   display: flex;
   position: fixed;
   justify-content: flex-end;
-  top: 64px;
-  left: calc(50% + 424px);
+  width: calc(50% + 54px);
   z-index: 1000;
 }
 
@@ -141,19 +141,20 @@ body {
 
 .main-content {
   width: 1056px;
-  /* 816px writing-canvas + 2*120px padding (adjust as needed) */
   display: flex;
   flex-direction: column;
   overflow: hidden;
   height: 100vh;
-  /* Center the writing-canvas horizontally in main-content */
   justify-content: flex-start;
 }
 
+.main-content.shifted-left {
+  margin-left: 300px;
+}
+
 .sidenav {
-  width: 250px;
+  width: 324px;
   background: #f5f5f5;
-  border-right: 1px solid #ddd;
   padding: 1em;
   overflow-y: auto;
   height: 100vh;
@@ -172,6 +173,10 @@ body {
 }
 
 .sidenav li {
+  max-width: 300px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
   margin-bottom: 0.5em;
   font-size: 1em;
   cursor: pointer;
