@@ -14,6 +14,7 @@ import QuickMenu from "./QuickMenu";
 import PDFPreviewModal from "./PDFPreviewModal";
 import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
 import { DockRightButton } from "./dockRight";
+import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
 
 function WritingCanvas({ docId, loadedBlocks }) {
   const contentRef = useRef(null);
@@ -227,14 +228,20 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
             <ul>
               {sluglines.map((block, idx) => (
-                <li key={idx}>{block.text}</li>
+                <li
+                  key={idx}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => scrollToAndFocusBlock(contentRef.current, block.text)}
+                >
+                  {block.text}
+                </li>
               ))}
             </ul>
           </nav>
         }
       </div>
       {/* Main editor area */}
-<div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
+      <div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
         <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
         {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
         <div className="writing-canvas-container" ref={containerRef}>

@@ -160,6 +160,40 @@ body {
   height: 100vh;
   box-sizing: border-box;
   flex-shrink: 0;
+
+  /* Custom scrollbar styles */
+  scrollbar-width: none;              /* Firefox */
+  scrollbar-color: #bbb #f5f5f5;      /* thumb color, track color */
+}
+
+/* Chrome, Edge, Safari */
+.sidenav::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* Show scrollbar on hover */
+.sidenav:hover {
+  scrollbar-width: thin; /* Show thin scrollbar on hover (Firefox) */
+  scrollbar-color: #bbb #f5f5f5;
+}
+
+.sidenav:hover::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidenav:hover::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 6px;
+}
+
+.sidenav::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+.sidenav::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 6px;
 }
 
 .sidenav h4 {
