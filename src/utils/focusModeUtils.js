@@ -3,17 +3,23 @@
  * Call this after DOM/caret update (e.g., after Enter or focus).
  * @param {number} [delay=0] - Optional delay in ms before running scroll logic.
  */
-export function scrollCaretToCenter(delay = 0) {
+export function scrollCaretToCenter(containerRef, delay = 0) {
   setTimeout(() => {
     const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
+    if (sel && sel.rangeCount > 0 && containerRef && containerRef.current) {
       let node = sel.anchorNode;
       while (node && node.nodeType !== 1) node = node.parentNode;
       if (node && node.scrollIntoView) {
         const rect = node.getBoundingClientRect();
-        const desiredY = window.innerHeight * 0.5;
-        const delta = rect.top - desiredY;
-        window.scrollBy({ top: delta, behavior: 'smooth' });
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const containerScrollTop = containerRef.current.scrollTop;
+        const caretY = rect.top - containerRect.top;
+        const desiredY = containerRef.current.clientHeight * 0.3;
+        const delta = caretY - desiredY;
+        containerRef.current.scrollTo({
+          top: containerScrollTop + delta,
+          behavior: 'smooth'
+        });
       }
     }
   }, delay);

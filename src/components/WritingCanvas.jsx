@@ -16,6 +16,7 @@ import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
 
 function WritingCanvas({ docId, loadedBlocks }) {
   const contentRef = useRef(null);
+  const containerRef = useRef(null);
   const [blocks, setBlocks] = useState(loadedBlocks || []);
   const [pageCount, setPageCount] = useState(1);
   const [focusMode, setFocusMode] = useState(false);
@@ -153,7 +154,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
         });
       }, 500);
     }
-    if (focusMode) scrollCaretToCenter(0);
+    if (focusMode) scrollCaretToCenter(containerRef, 0);
 
     if (e.key.length === 1) handleModifiedCharacter();
   }
@@ -207,22 +208,37 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const focusModeStyle = getFocusModeStyle(focusMode);
 
+  // Extract sluglines for sidenav
+  const sluglines = (blocks || []).filter(b => b.type === "slug-line");
+
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
-      {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
-      <div className="writing-canvas-container">
-        {!focusMode && overlays}
-        <div
-          ref={contentRef}
-          contentEditable="true"
-          className="writing-canvas"
-          style={focusModeStyle}
-          suppressContentEditableWarning={true}
-          onInput={handleInput}
-          onKeyDown={handleKeyDown}
-        >
-          {(!loadedBlocks || loadedBlocks.length === 0) && <div data-name="action">{'\u200B'}</div>}
+    <div className="writing-canvas-root">
+      {/* Sidenav with sluglines */}
+      <nav className="sidenav">
+        <h4>Scenes</h4>
+        <ul>
+          {sluglines.map((block, idx) => (
+            <li key={idx}>{block.text}</li>
+          ))}
+        </ul>
+      </nav>
+      {/* Main editor area */}
+      <div className="main-content">
+        <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
+        {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
+        <div className="writing-canvas-container" ref={containerRef}>
+          {!focusMode && overlays}
+          <div
+            ref={contentRef}
+            contentEditable="true"
+            className="writing-canvas"
+            style={focusModeStyle}
+            suppressContentEditableWarning={true}
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
+          >
+            {(!loadedBlocks || loadedBlocks.length === 0) && <div data-name="action">{'\u200B'}</div>}
+          </div>
         </div>
       </div>
     </div>
