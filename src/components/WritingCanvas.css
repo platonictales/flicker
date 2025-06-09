@@ -4,12 +4,17 @@
   font-family: "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;
   margin: 0 auto;
   position: relative;
-    overflow-y: auto;           /* Enable vertical scroll */
+  overflow-y: auto;
+  /* Enable vertical scroll */
 
-    scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
 }
-html, body {
+
+html,
+body {
   height: 100vh;
   margin: 0;
   padding: 0;
@@ -130,14 +135,19 @@ html, body {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  /* Center the content horizontally */
+  align-items: flex-start;
 }
 
 .main-content {
-  flex: 1;
+  width: 1056px;
+  /* 816px writing-canvas + 2*120px padding (adjust as needed) */
   display: flex;
   flex-direction: column;
   overflow: hidden;
   height: 100vh;
+  /* Center the writing-canvas horizontally in main-content */
+  justify-content: flex-start;
 }
 
 .sidenav {
