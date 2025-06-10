@@ -31,6 +31,9 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   function enableSideDock() {
     setDocActive(!dockActive);
+    if(focusMode) {
+      setDocActive(false);
+    }
   }
   useAutoSaveBlocks(blocks, docId);
 
@@ -88,7 +91,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   function enableFocusMode() {
     setFocusMode(!focusMode);
-    setDocActive(false);
+    setDocActive(focusMode);
   }
 
   useEffect(() => {
@@ -223,9 +226,10 @@ function WritingCanvas({ docId, loadedBlocks }) {
   return (
     <div className="writing-canvas-root">
       <div>
+        {!focusMode && 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: " #f5f5f5" }}>
           <DockRightButton onClick={() => enableSideDock()} />
-        </div>
+        </div>}
         {dockActive &&
           <nav className="sidenav">
             <ul>
