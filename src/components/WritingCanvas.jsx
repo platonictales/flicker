@@ -15,6 +15,8 @@ import PDFPreviewModal from "./PDFPreviewModal";
 import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
 import { DockRightButton } from "./dockRight";
 import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
+import { cleanupScreenplayBlocks, isCaretAtEnd } from "../utils/cleanUpOnEditUtils";
+
 
 function WritingCanvas({ docId, loadedBlocks }) {
   const contentRef = useRef(null);
@@ -159,10 +161,15 @@ function WritingCanvas({ docId, loadedBlocks }) {
           invoke('auto_save_blocks', { blocks, docId });
         });
       }, 500);
+
+      if (contentRef.current && !isCaretAtEnd(contentRef.current)) {
+        cleanupScreenplayBlocks(contentRef.current);
+      }
     }
     if (focusMode) scrollCaretToCenter(containerRef, 0);
 
     if (e.key.length === 1) handleModifiedCharacter();
+
   }
 
   const handleInput = (e) => {
