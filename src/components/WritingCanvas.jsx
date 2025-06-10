@@ -27,7 +27,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const [showPDF, setShowPDF] = useState(false);
   const [pdfBlob, setPdfBlob] = useState(null);
   const [activePage, setActivePage] = useState(1);
-  const [dockActive, setDocActive] = useState(true);
+  const [dockActive, setDocActive] = useState(false);
 
   function enableSideDock() {
     setDocActive(!dockActive);
@@ -72,16 +72,13 @@ function WritingCanvas({ docId, loadedBlocks }) {
       if (!sel || sel.rangeCount === 0) return;
       const range = sel.getRangeAt(0);
       let node = range.startContainer;
-      // Find the block div
       while (node && node !== contentRef.current && node.nodeType !== 1) {
         node = node.parentNode;
       }
       if (!node || node === contentRef.current) return;
-      // Get caret Y position relative to editor
       const rect = node.getBoundingClientRect();
       const editorRect = contentRef.current.getBoundingClientRect();
       const caretY = rect.top - editorRect.top;
-      // Calculate page number (1-based)
       const page = Math.floor(caretY / PAGE_HEIGHT) + 1;
       setActivePage(page);
     };
@@ -91,6 +88,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   function enableFocusMode() {
     setFocusMode(!focusMode);
+    setDocActive(false);
   }
 
   useEffect(() => {
@@ -221,18 +219,15 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const focusModeStyle = getFocusModeStyle(focusMode);
 
-  // Extract sluglines for sidenav
   const sluglines = (blocks || []).filter(b => b.type === "slug-line");
   return (
     <div className="writing-canvas-root">
-      {/* Sidenav with sluglines */}
       <div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: " #f5f5f5" }}>
           <DockRightButton onClick={() => enableSideDock()} />
         </div>
         {dockActive &&
           <nav className="sidenav">
-
             <ul>
               {sluglines.map((block, idx) => (
                 <li
