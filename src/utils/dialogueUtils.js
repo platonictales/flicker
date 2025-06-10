@@ -7,7 +7,24 @@ export function createDialogueDivAndFocus(target, selection) {
   newDiv.setAttribute("data-name", "dialogue");
   newDiv.style.paddingLeft = "1in";
   newDiv.style.paddingRight = "1.5in";
-  target.appendChild(newDiv);
+
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    let currentNode = range.startContainer;
+    while (currentNode && currentNode.nodeType !== 1) currentNode = currentNode.parentNode;
+    if (currentNode && currentNode.parentNode === target) {
+      if (currentNode.nextSibling) {
+        target.insertBefore(newDiv, currentNode.nextSibling);
+      } else {
+        target.appendChild(newDiv);
+      }
+    } else {
+      target.appendChild(newDiv);
+    }
+  } else {
+    target.appendChild(newDiv);
+  }
+
   const newRange = document.createRange();
   newRange.selectNodeContents(newDiv);
   newRange.collapse(false);

@@ -13,16 +13,28 @@ import { generateScreenplayPDFBlob } from "../utils/previewUtils";
 import QuickMenu from "./QuickMenu";
 import PDFPreviewModal from "./PDFPreviewModal";
 import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
+import { DockRightButton } from "./dockRight";
+import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
+import { cleanupScreenplayBlocks, isCaretAtEnd } from "../utils/cleanUpOnEditUtils";
+
 
 function WritingCanvas({ docId, loadedBlocks }) {
   const contentRef = useRef(null);
+  const containerRef = useRef(null);
   const [blocks, setBlocks] = useState(loadedBlocks || []);
   const [pageCount, setPageCount] = useState(1);
   const [focusMode, setFocusMode] = useState(false);
   const [showPDF, setShowPDF] = useState(false);
   const [pdfBlob, setPdfBlob] = useState(null);
   const [activePage, setActivePage] = useState(1);
+  const [dockActive, setDocActive] = useState(false);
 
+  function enableSideDock() {
+    setDocActive(!dockActive);
+    if(focusMode) {
+      setDocActive(false);
+    }
+  }
   useAutoSaveBlocks(blocks, docId);
 
   useEffect(() => {
@@ -47,7 +59,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
       }
     };
   }, []);
-  
+
   useEffect(() => {
     if (loadedBlocks && loadedBlocks.length > 0) {
       setBlocks(loadedBlocks);
@@ -63,16 +75,13 @@ function WritingCanvas({ docId, loadedBlocks }) {
       if (!sel || sel.rangeCount === 0) return;
       const range = sel.getRangeAt(0);
       let node = range.startContainer;
-      // Find the block div
       while (node && node !== contentRef.current && node.nodeType !== 1) {
         node = node.parentNode;
       }
       if (!node || node === contentRef.current) return;
-      // Get caret Y position relative to editor
       const rect = node.getBoundingClientRect();
       const editorRect = contentRef.current.getBoundingClientRect();
       const caretY = rect.top - editorRect.top;
-      // Calculate page number (1-based)
       const page = Math.floor(caretY / PAGE_HEIGHT) + 1;
       setActivePage(page);
     };
@@ -82,6 +91,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   function enableFocusMode() {
     setFocusMode(!focusMode);
+    setDocActive(focusMode);
   }
 
   useEffect(() => {
@@ -152,10 +162,15 @@ function WritingCanvas({ docId, loadedBlocks }) {
           invoke('auto_save_blocks', { blocks, docId });
         });
       }, 500);
+
+      if (contentRef.current && !isCaretAtEnd(contentRef.current)) {
+        cleanupScreenplayBlocks(contentRef.current);
+      }
     }
-    if (focusMode) scrollCaretToCenter(0);
+    if (focusMode) scrollCaretToCenter(containerRef, 0);
 
     if (e.key.length === 1) handleModifiedCharacter();
+
   }
 
   const handleInput = (e) => {
@@ -207,22 +222,47 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const focusModeStyle = getFocusModeStyle(focusMode);
 
+  const sluglines = (blocks || []).filter(b => b.type === "slug-line");
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
-      {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
-      <div className="writing-canvas-container">
-        {!focusMode && overlays}
-        <div
-          ref={contentRef}
-          contentEditable="true"
-          className="writing-canvas"
-          style={focusModeStyle}
-          suppressContentEditableWarning={true}
-          onInput={handleInput}
-          onKeyDown={handleKeyDown}
-        >
-          {(!loadedBlocks || loadedBlocks.length === 0) && <div data-name="action">{'\u200B'}</div>}
+    <div className="writing-canvas-root">
+      <div>
+        {!focusMode && 
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: " #f5f5f5" }}>
+          <DockRightButton onClick={() => enableSideDock()} />
+        </div>}
+        {dockActive &&
+          <nav className="sidenav">
+            <ul>
+              {sluglines.map((block, idx) => (
+                <li
+                  key={idx}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => scrollToAndFocusBlock(contentRef.current, block.text)}
+                >
+                  {block.text}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        }
+      </div>
+      {/* Main editor area */}
+      <div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
+        <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
+        {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
+        <div className="writing-canvas-container" ref={containerRef}>
+          {!focusMode && overlays}
+          <div
+            ref={contentRef}
+            contentEditable="true"
+            className="writing-canvas"
+            style={focusModeStyle}
+            suppressContentEditableWarning={true}
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
+          >
+            {(!loadedBlocks || loadedBlocks.length === 0) && <div data-name="action">{'\u200B'}</div>}
+          </div>
         </div>
       </div>
     </div>

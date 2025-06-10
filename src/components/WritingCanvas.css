@@ -4,8 +4,23 @@
   font-family: "Courier Prime Sans", "Courier Prime", "Courier New", Courier, monospace;
   margin: 0 auto;
   position: relative;
+  overflow-y: auto;
+  /* Enable vertical scroll */
+
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+}
+
+html,
+body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
 }
+
 
 .writing-canvas {
   width: 816px;
@@ -69,11 +84,11 @@
 
 .quick-menu {
   color: #888;
+  background: #ffffff;
   display: flex;
   position: fixed;
   justify-content: flex-end;
-  top: 64px;
-  left: calc(50% + 424px);
+  width: calc(50% + 54px);
   z-index: 1000;
 }
 
@@ -113,4 +128,90 @@
   padding-right: 0in;
   margin-bottom: 1em;
   text-align: right;
+}
+
+.writing-canvas-root {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  /* Center the content horizontally */
+  align-items: flex-start;
+}
+
+.main-content {
+  width: 1056px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100vh;
+  justify-content: flex-start;
+}
+
+.main-content.shifted-left {
+  margin-left: 300px;
+}
+
+.sidenav {
+  width: 324px;
+  background: #f5f5f5;
+  padding: 1em;
+  overflow-y: auto;
+  height: 100vh;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  /* Custom scrollbar styles */
+  scrollbar-width: none;              /* Firefox */
+  scrollbar-color: #bbb #f5f5f5;      /* thumb color, track color */
+}
+
+/* Chrome, Edge, Safari */
+.sidenav::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* Show scrollbar on hover */
+.sidenav:hover {
+  scrollbar-width: thin; /* Show thin scrollbar on hover (Firefox) */
+  scrollbar-color: #bbb #f5f5f5;
+}
+
+.sidenav:hover::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidenav:hover::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 6px;
+}
+
+.sidenav::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+.sidenav::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.sidenav h4 {
+  margin-top: 0;
+}
+
+.sidenav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidenav li {
+  max-width: 300px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  margin-bottom: 0.5em;
+  font-size: 1em;
+  cursor: pointer;
 }
