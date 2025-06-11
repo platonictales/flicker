@@ -255,7 +255,12 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const focusModeStyle = getFocusModeStyle(focusMode);
 
-  const sluglines = (blocks || []).filter(b => b.type === "slug-line");
+  const sluglines = (blocks || [])
+  .filter(b => b.type === "slug-line")
+  .map((b, idx) => ({
+    ...b,
+    id: idx + 1
+  }));
 
   return (
     <div className="writing-canvas-root">
