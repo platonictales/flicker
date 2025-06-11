@@ -123,9 +123,11 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   // Debounced save on Enter key
   const enterSaveTimeout = useRef();
+
   const handleKeyDown = (e) => {
     const target = e.target;
 
+    if (e.key === "Escape") setShowSuggestions(false);
     // Slugline suggestion navigation
     if (showSuggestions && sluglineSuggestionsList.length > 0) {
       if (e.key === "Tab") {
@@ -221,23 +223,22 @@ function WritingCanvas({ docId, loadedBlocks }) {
     const isSlugLine = sceneHeadings.includes(textUpper);
     const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
 
-    // Slugline suggestion logic
-    handleSluglineSuggestions({
-      textUpper,
-      blocks,
-      setSluglineSuggestions,
-      setShowSuggestions,
-      setSuggestionIndex,
-      setSuggestionPos,
-      contentRef,
-    });
-
     if (isSlugLine) {
+      handleSluglineSuggestions({
+        textUpper,
+        blocks,
+        setSluglineSuggestions,
+        setShowSuggestions,
+        setSuggestionIndex,
+        setSuggestionPos,
+        contentRef,
+      });
       replaceWithSluglineDiv(currentNode);
     } else if (startsWithSlug) {
       ensureSluglineClass(currentNode);
     } else {
       removeSluglineClass(currentNode);
+      setShowSuggestions(false)
     }
 
     const editor = e.target;
@@ -265,24 +266,24 @@ function WritingCanvas({ docId, loadedBlocks }) {
         contentRef={contentRef}
       />
       {/* Main editor area */}
-    <Canvas
-      dockActive={dockActive}
-      focusMode={focusMode}
-      overlays={overlays}
-      enableFocusMode={() => enableFocusMode()}
-      containerRef={containerRef}
-      contentRef={contentRef}
-      focusModeStyle={focusModeStyle}
-      handleInput={handleInput}
-      handleKeyDown={handleKeyDown}
-      loadedBlocks={loadedBlocks}
-      showSuggestions={showSuggestions}
-      sluglineSuggestionsList={sluglineSuggestionsList}
-      suggestionIndex={suggestionIndex}
-      suggestionPos={suggestionPos}
-      insertSuggestion={insertSuggestion}
-      blocks={blocks}
-    />
+      <Canvas
+        dockActive={dockActive}
+        focusMode={focusMode}
+        overlays={overlays}
+        enableFocusMode={() => enableFocusMode()}
+        containerRef={containerRef}
+        contentRef={contentRef}
+        focusModeStyle={focusModeStyle}
+        handleInput={handleInput}
+        handleKeyDown={handleKeyDown}
+        loadedBlocks={loadedBlocks}
+        showSuggestions={showSuggestions}
+        sluglineSuggestionsList={sluglineSuggestionsList}
+        suggestionIndex={suggestionIndex}
+        suggestionPos={suggestionPos}
+        insertSuggestion={insertSuggestion}
+        blocks={blocks}
+      />
     </div>
   );
 }

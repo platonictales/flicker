@@ -34,8 +34,7 @@ export function insertSuggestionUtil(suggestion, setShowSuggestions) {
   if (currentNode) {
     currentNode.innerText = suggestion;
     setShowSuggestions(false);
-    // removeSluglineClass(currentNode);
-    ensureSluglineClass(currentNode);
+    
     // Move caret to end
     const newRange = document.createRange();
     newRange.selectNodeContents(currentNode);
