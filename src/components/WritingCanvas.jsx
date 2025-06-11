@@ -71,6 +71,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
       setBlocks(loadedBlocks);
       if (contentRef.current) {
         contentRef.current.innerHTML = loadedBlocks.map(renderBlockDiv).join("");
+        setCaretToEnd(contentRef.current);
       }
     }
   }, [loadedBlocks]);
@@ -255,6 +256,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const focusModeStyle = getFocusModeStyle(focusMode);
 
   const sluglines = (blocks || []).filter(b => b.type === "slug-line");
+
   return (
     <div className="writing-canvas-root">
       <SideDockNav
