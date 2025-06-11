@@ -194,7 +194,15 @@ function WritingCanvas({ docId, loadedBlocks }) {
     }
     if (focusMode) scrollCaretToCenter(containerRef, 0);
 
-    if (e.key.length === 1) handleModifiedCharacter();
+    if (
+      e.key.length === 1 &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.altKey &&
+      !e.shiftKey
+    ) {
+      handleModifiedCharacter();
+    }
   };
 
   function insertSuggestion(suggestion) {
@@ -256,11 +264,11 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const focusModeStyle = getFocusModeStyle(focusMode);
 
   const sluglines = (blocks || [])
-  .filter(b => b.type === "slug-line")
-  .map((b, idx) => ({
-    ...b,
-    id: idx + 1
-  }));
+    .filter(b => b.type === "slug-line")
+    .map((b, idx) => ({
+      ...b,
+      id: idx + 1
+    }));
 
   return (
     <div className="writing-canvas-root">
