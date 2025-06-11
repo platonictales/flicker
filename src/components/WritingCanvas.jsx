@@ -16,22 +16,35 @@ import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
 import { DockRightButton } from "./dockRight";
 import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
 import { cleanupScreenplayBlocks, isCaretAtEnd } from "../utils/cleanUpOnEditUtils";
-
+import SluglineSuggestions from "./SluglineSuggestions";
+import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
+import { handleSluglineSuggestions } from "../utils/sluglineSuggestionUtils";
 
 function WritingCanvas({ docId, loadedBlocks }) {
   const contentRef = useRef(null);
   const containerRef = useRef(null);
+
   const [blocks, setBlocks] = useState(loadedBlocks || []);
+
   const [pageCount, setPageCount] = useState(1);
+  const [activePage, setActivePage] = useState(1);
+
   const [focusMode, setFocusMode] = useState(false);
+
   const [showPDF, setShowPDF] = useState(false);
   const [pdfBlob, setPdfBlob] = useState(null);
-  const [activePage, setActivePage] = useState(1);
+
+
   const [dockActive, setDocActive] = useState(false);
+
+  const [sluglineSuggestions, setSluglineSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionIndex, setSuggestionIndex] = useState(0);
+  const [suggestionPos, setSuggestionPos] = useState({ left: 0, top: 0 });
 
   function enableSideDock() {
     setDocActive(!dockActive);
-    if(focusMode) {
+    if (focusMode) {
       setDocActive(false);
     }
   }
@@ -120,6 +133,22 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const handleKeyDown = (e) => {
     const target = e.target;
 
+    // Slugline suggestion navigation
+    if (showSuggestions && sluglineSuggestions.length > 0) {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        setSuggestionIndex((prev) => (prev + 1) % sluglineSuggestions.length);
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (sluglineSuggestions[suggestionIndex]) {
+          insertSuggestion(sluglineSuggestions[suggestionIndex]);
+        }
+        return;
+      }
+    }
+
     if (e.key === "(") {
       autoInsertParentheses(e);
       if (handleParentheticalTrigger()) return;
@@ -170,7 +199,10 @@ function WritingCanvas({ docId, loadedBlocks }) {
     if (focusMode) scrollCaretToCenter(containerRef, 0);
 
     if (e.key.length === 1) handleModifiedCharacter();
+  };
 
+  function insertSuggestion(suggestion) {
+    insertSuggestionUtil(suggestion, setShowSuggestions, ensureSluglineClass);
   }
 
   const handleInput = (e) => {
@@ -188,12 +220,24 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
     if (isNodeEmpty(currentNode)) {
       removeInlineTextStyles(currentNode);
+      setShowSuggestions(false);
       return;
     }
 
     const textUpper = getTextContentUpper(currentNode);
     const isSlugLine = sceneHeadings.includes(textUpper);
     const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
+
+    // Slugline suggestion logic
+    handleSluglineSuggestions({
+      textUpper,
+      blocks,
+      setSluglineSuggestions,
+      setShowSuggestions,
+      setSuggestionIndex,
+      setSuggestionPos,
+      contentRef,
+    });
 
     if (isSlugLine) {
       replaceWithSluglineDiv(currentNode);
@@ -209,13 +253,13 @@ function WritingCanvas({ docId, loadedBlocks }) {
       text: div.innerText
     }));
     setBlocks(newBlocks);
-  }
+  };
 
   const handlePreview = () => {
     const blob = generateScreenplayPDFBlob(blocks);
     setPdfBlob(blob);
     setShowPDF(true);
-  }
+  };
 
   // Only show overlays for the active page
   const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
@@ -226,10 +270,10 @@ function WritingCanvas({ docId, loadedBlocks }) {
   return (
     <div className="writing-canvas-root">
       <div>
-        {!focusMode && 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: " #f5f5f5" }}>
-          <DockRightButton onClick={() => enableSideDock()} />
-        </div>}
+        {!focusMode &&
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: " #f5f5f5" }}>
+            <DockRightButton onClick={() => enableSideDock()} />
+          </div>}
         {dockActive &&
           <nav className="sidenav">
             <ul>
@@ -263,6 +307,14 @@ function WritingCanvas({ docId, loadedBlocks }) {
           >
             {(!loadedBlocks || loadedBlocks.length === 0) && <div data-name="action">{'\u200B'}</div>}
           </div>
+          {/* Slugline suggestions dropdown */}
+          <SluglineSuggestions
+            show={showSuggestions}
+            suggestions={sluglineSuggestions}
+            suggestionIndex={suggestionIndex}
+            suggestionPos={suggestionPos}
+            onSelect={insertSuggestion}
+          />
         </div>
       </div>
     </div>
