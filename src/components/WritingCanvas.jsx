@@ -9,16 +9,13 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
-import { generateScreenplayPDFBlob } from "../utils/previewUtils";
-import QuickMenu from "./QuickMenu";
-import PDFPreviewModal from "./PDFPreviewModal";
 import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
-import { DockRightButton } from "./dockRight";
 import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
 import { cleanupScreenplayBlocks, isCaretAtEnd } from "../utils/cleanUpOnEditUtils";
-import SluglineSuggestions from "./SluglineSuggestions";
 import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
 import { handleSluglineSuggestions } from "../utils/sluglineSuggestionUtils";
+import SideDockNav from "./SideDockNav";
+import Canvas from "./Canvas";
 
 function WritingCanvas({ docId, loadedBlocks }) {
   const contentRef = useRef(null);
@@ -31,13 +28,9 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const [focusMode, setFocusMode] = useState(false);
 
-  const [showPDF, setShowPDF] = useState(false);
-  const [pdfBlob, setPdfBlob] = useState(null);
-
-
   const [dockActive, setDocActive] = useState(false);
 
-  const [sluglineSuggestions, setSluglineSuggestions] = useState([]);
+  const [sluglineSuggestionsList, setSluglineSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [suggestionPos, setSuggestionPos] = useState({ left: 0, top: 0 });
@@ -134,16 +127,16 @@ function WritingCanvas({ docId, loadedBlocks }) {
     const target = e.target;
 
     // Slugline suggestion navigation
-    if (showSuggestions && sluglineSuggestions.length > 0) {
+    if (showSuggestions && sluglineSuggestionsList.length > 0) {
       if (e.key === "Tab") {
         e.preventDefault();
-        setSuggestionIndex((prev) => (prev + 1) % sluglineSuggestions.length);
+        setSuggestionIndex((prev) => (prev + 1) % sluglineSuggestionsList.length);
         return;
       }
       if (e.key === "Enter") {
         e.preventDefault();
-        if (sluglineSuggestions[suggestionIndex]) {
-          insertSuggestion(sluglineSuggestions[suggestionIndex]);
+        if (sluglineSuggestionsList[suggestionIndex]) {
+          insertSuggestion(sluglineSuggestionsList[suggestionIndex]);
         }
         return;
       }
@@ -255,12 +248,6 @@ function WritingCanvas({ docId, loadedBlocks }) {
     setBlocks(newBlocks);
   };
 
-  const handlePreview = () => {
-    const blob = generateScreenplayPDFBlob(blocks);
-    setPdfBlob(blob);
-    setShowPDF(true);
-  };
-
   // Only show overlays for the active page
   const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
 
@@ -269,54 +256,33 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const sluglines = (blocks || []).filter(b => b.type === "slug-line");
   return (
     <div className="writing-canvas-root">
-      <div>
-        {!focusMode &&
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: " #f5f5f5" }}>
-            <DockRightButton onClick={() => enableSideDock()} />
-          </div>}
-        {dockActive &&
-          <nav className="sidenav">
-            <ul>
-              {sluglines.map((block, idx) => (
-                <li
-                  key={idx}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => scrollToAndFocusBlock(contentRef.current, block.text)}
-                >
-                  {block.text}
-                </li>
-              ))}
-            </ul>
-          </nav>
-        }
-      </div>
+      <SideDockNav
+        focusMode={focusMode}
+        dockActive={dockActive}
+        sluglines={sluglines}
+        enableSideDock={enableSideDock}
+        scrollToAndFocusBlock={scrollToAndFocusBlock}
+        contentRef={contentRef}
+      />
       {/* Main editor area */}
-      <div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
-        <QuickMenu onExport={handlePreview} onFocus={() => enableFocusMode()} isFocusMode={focusMode} />
-        {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
-        <div className="writing-canvas-container" ref={containerRef}>
-          {!focusMode && overlays}
-          <div
-            ref={contentRef}
-            contentEditable="true"
-            className="writing-canvas"
-            style={focusModeStyle}
-            suppressContentEditableWarning={true}
-            onInput={handleInput}
-            onKeyDown={handleKeyDown}
-          >
-            {(!loadedBlocks || loadedBlocks.length === 0) && <div data-name="action">{'\u200B'}</div>}
-          </div>
-          {/* Slugline suggestions dropdown */}
-          <SluglineSuggestions
-            show={showSuggestions}
-            suggestions={sluglineSuggestions}
-            suggestionIndex={suggestionIndex}
-            suggestionPos={suggestionPos}
-            onSelect={insertSuggestion}
-          />
-        </div>
-      </div>
+    <Canvas
+      dockActive={dockActive}
+      focusMode={focusMode}
+      overlays={overlays}
+      enableFocusMode={() => enableFocusMode()}
+      containerRef={containerRef}
+      contentRef={contentRef}
+      focusModeStyle={focusModeStyle}
+      handleInput={handleInput}
+      handleKeyDown={handleKeyDown}
+      loadedBlocks={loadedBlocks}
+      showSuggestions={showSuggestions}
+      sluglineSuggestionsList={sluglineSuggestionsList}
+      suggestionIndex={suggestionIndex}
+      suggestionPos={suggestionPos}
+      insertSuggestion={insertSuggestion}
+      blocks={blocks}
+    />
     </div>
   );
 }
