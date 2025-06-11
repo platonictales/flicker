@@ -97,6 +97,14 @@ function Canvas({
       handleInput({ target: contentRef.current });
     }
   }
+  function handleCut(e) {
+    // Let the default cut happen first, then update state
+    setTimeout(() => {
+      if (typeof handleInput === "function") {
+        handleInput({ target: contentRef.current });
+      }
+    }, 0);
+  }
 
   return (
     <div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
@@ -113,6 +121,8 @@ function Canvas({
           onInput={handleInput}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
+          onCut={handleCut}
+
         >
           {(!loadedBlocks || loadedBlocks.length === 0) && <div data-name="action">{'\u200B'}</div>}
         </div>
