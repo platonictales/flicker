@@ -3,6 +3,7 @@ import PDFPreviewModal from "./PDFPreviewModal";
 import SluglineSuggestions from "./SluglineSuggestions";
 import { useState } from "react";
 import { generateScreenplayPDFBlob } from "../utils/previewUtils";
+import { generateBlockId } from "../utils/generateBlockIdUtil";
 
 function Canvas({
   dockActive,
@@ -65,6 +66,8 @@ function Canvas({
 
     blocks.forEach(block => {
       const newBlock = block.cloneNode(true);
+      newBlock.setAttribute("data-id", generateBlockId());
+
       if (insertAfter && insertAfter.nextSibling) {
         contentRef.current.insertBefore(newBlock, insertAfter.nextSibling);
         insertAfter = newBlock;

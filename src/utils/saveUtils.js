@@ -22,8 +22,10 @@ export function extractDocId(filePath) {
     .replace(/\.json$/, "");
 }
 
-export const renderBlockDiv = (block) =>
-  `<div data-name="${block.type || "action"}" class="${block.type || "action"}">${block.text
+export const renderBlockDiv = (block) => {
+  const id = block.id || `block_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
+  return `<div data-name="${block.type || "action"}" class="${block.type || "action"}" data-id="${id}">${block.text
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/\n/g, "<br>")}</div>`;
+};

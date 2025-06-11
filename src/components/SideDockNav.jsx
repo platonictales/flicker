@@ -23,7 +23,7 @@ function SideDockNav({
               <li
                 key={idx}
                 style={{ cursor: "pointer" }}
-                onClick={() => scrollToAndFocusBlock(contentRef.current, block.text)}
+                onClick={() => scrollToAndFocusBlock(contentRef.current, block.id)}
               >
                 {block.text}
               </li>

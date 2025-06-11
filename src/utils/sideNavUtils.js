@@ -3,13 +3,14 @@
  * @param {HTMLElement} editor - The contentEditable container (e.g., contentRef.current)
  * @param {string} blockText - The text of the block to find and focus
  */
-export function scrollToAndFocusBlock(editor, blockText) {
+export function scrollToAndFocusBlock(editor, blockId) {
   if (!editor) return;
   const divs = Array.from(editor.children);
-  const match = divs.find(div => div.innerText.trim() === blockText.trim());
+  const sluglineDivs = divs.filter(div => div.getAttribute("data-name") === "slug-line");
+  const match = sluglineDivs[blockId - 1];
+
   if (match) {
     match.scrollIntoView({ behavior: "smooth", block: "center" });
-    // Optionally, set caret inside the div:
     const range = document.createRange();
     range.selectNodeContents(match);
     range.collapse(false);

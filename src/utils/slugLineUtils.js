@@ -1,3 +1,5 @@
+import { generateBlockId } from "../utils/generateBlockIdUtil";
+
 export function getParentElementNode(currentNode) {
   if (currentNode.nodeType === Node.ELEMENT_NODE) {
     return currentNode;
@@ -11,6 +13,8 @@ export function removeInlineTextStyles(currentNode) {
   let el = getParentElementNode(currentNode);
   if (el) {
     el.setAttribute("data-name", "action");
+    el.setAttribute("data-id", generateBlockId());
+
     el.style.textTransform = "none";
     el.style.fontWeight = "normal";
     el.style.paddingLeft = "0";
@@ -23,6 +27,8 @@ export function transformIntoActionNode(currentNode) {
   let el = getParentElementNode(currentNode);
   if (el) {
     el.setAttribute("data-name", "action");
+    el.setAttribute("data-id", generateBlockId());
+
     el.style.textTransform = "none";
     el.style.fontWeight = "normal";
     el.style.paddingLeft = "0";
@@ -35,6 +41,8 @@ export function transformIntoActionNode(currentNode) {
 export function replaceWithSluglineDiv(currentNode) {
   const boldNode = document.createElement("div");
   boldNode.setAttribute("data-name", "slug-line");
+  boldNode.setAttribute("data-id", generateBlockId());
+
   boldNode.className = "slugline";
   boldNode.textContent = currentNode.textContent;
   boldNode.style.textTransform = "uppercase";
@@ -60,6 +68,8 @@ export function ensureSluglineClass(currentNode) {
     el.classList.remove("normal-text");
     el.classList.add("slugline");
     el.setAttribute("data-name", "slug-line");
+    el.setAttribute("data-id", generateBlockId());
+
     el.style.textTransform = "uppercase";
     el.style.fontWeight = "bold";
   }
@@ -69,6 +79,8 @@ export function removeSluglineClass(currentNode) {
   let el = getParentElementNode(currentNode);
   if (el && el.classList && el.classList.contains("slugline")) {
     el.setAttribute("data-name", "action");
+    el.setAttribute("data-id", generateBlockId());
+
     el.classList.remove("slugline");
     el.classList.add("normal-text");
   }
