@@ -35,6 +35,9 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [suggestionPos, setSuggestionPos] = useState({ left: 0, top: 0 });
 
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
+  
   function enableSideDock() {
     setDocActive(!dockActive);
     if (focusMode) {
@@ -126,8 +129,86 @@ function WritingCanvas({ docId, loadedBlocks }) {
   // Debounced save on Enter key
   const enterSaveTimeout = useRef();
 
+  // --- Undo/Redo helpers ---
+  function getCaretPosition() {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return null;
+    const range = selection.getRangeAt(0);
+    return {
+      startContainerPath: getNodePath(range.startContainer, contentRef.current),
+      startOffset: range.startOffset,
+    };
+  }
+
+  function getNodePath(node, root) {
+    const path = [];
+    while (node && node !== root) {
+      let idx = 0;
+      let sibling = node;
+      while ((sibling = sibling.previousSibling)) idx++;
+      path.unshift(idx);
+      node = node.parentNode;
+    }
+    return path;
+  }
+
+function restoreCaret(caret) {
+  if (!caret) return;
+  let node = contentRef.current;
+  for (const idx of caret.startContainerPath) {
+    if (!node || !node.childNodes || !node.childNodes[idx]) {
+      node = null;
+      break;
+    }
+    node = node.childNodes[idx];
+  }
+  if (!node) return;
+  const maxOffset = node.nodeType === 3 ? node.length : node.childNodes.length;
+  const safeOffset = Math.min(caret.startOffset, maxOffset);
+  const range = document.createRange();
+  range.setStart(node, safeOffset);
+  range.collapse(true);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
   const handleKeyDown = (e) => {
     const target = e.target;
+
+    // Undo (Ctrl+Z or Cmd+Z)
+    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+      e.preventDefault();
+      setUndoStack(prev => {
+        if (prev.length === 0) return prev;
+        const last = prev[prev.length - 1];
+        setRedoStack(r => [...r, { blocks, caret: getCaretPosition() }]);
+        setBlocks(last.blocks);
+        if (contentRef.current) {
+          contentRef.current.innerHTML = last.blocks.map(renderBlockDiv).join("");
+          restoreCaret(last.caret);
+        }
+        return prev.slice(0, -1);
+      });
+      return;
+    }
+
+    // Redo (Ctrl+Y or Cmd+Shift+Z)
+    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && (e.key === "Z"|| e.key === "z")))) {
+      e.preventDefault();
+      setRedoStack(prev => {
+        if (prev.length === 0) return prev;
+        const last = prev[prev.length - 1];
+        setUndoStack(u => [...u, { blocks, caret: getCaretPosition() }]);
+        setBlocks(last.blocks);
+        if (contentRef.current) {
+          contentRef.current.innerHTML = last.blocks.map(renderBlockDiv).join("");
+          restoreCaret(last.caret);
+        }
+        return prev.slice(0, -1);
+      });
+      return;
+    }
 
     if (e.key === "Escape") setShowSuggestions(false);
     // Slugline suggestion navigation
@@ -212,6 +293,16 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const handleInput = (e) => {
     const target = e.target;
+
+    // --- UNDO: Save state and caret before updating blocks ---
+    setUndoStack(prev => [
+      ...prev,
+      {
+        blocks,
+        caret: getCaretPosition(),
+      },
+    ]);
+    setRedoStack([]); // Clear redo stack on new input
 
     if (ensureZeroWidthDiv(target)) return;
 
