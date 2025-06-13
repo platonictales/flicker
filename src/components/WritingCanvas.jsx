@@ -9,7 +9,7 @@ import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writi
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
-import { useAutoSaveBlocks, renderBlockDiv } from '../utils/saveUtils';
+import { useAutoSaveBlocks, renderBlockDiv } from '../utils/fileUtils';
 import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
 import { cleanupScreenplayBlocks, isCaretAtEnd } from "../utils/cleanUpOnEditUtils";
 import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
@@ -41,6 +41,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
       setDocActive(false);
     }
   }
+
   useAutoSaveBlocks(blocks, docId);
 
   useEffect(() => {
