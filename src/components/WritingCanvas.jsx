@@ -5,7 +5,7 @@ import { getFocusModeStyle, scrollCaretToCenter, setCaretToEnd, updateBlockOpaci
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
-import { ensureZeroWidthDiv, removeZeroWidthSpaceFromNode } from "../utils/writingCanvasUtils";
+import { ensureZeroWidthDiv, ensureZeroWidthDivAction, removeZeroWidthSpaceFromNode } from "../utils/writingCanvasUtils";
 import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
@@ -133,6 +133,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const handleKeyDown = (e) => {
     const target = e.target;
+    ensureZeroWidthDivAction(target)
 
     if ((e.ctrlKey || e.metaKey) && e.key === "z") {
       e.preventDefault();
@@ -259,7 +260,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
         caret: getCaretPosition(contentRef),
       },
     ]);
-    setRedoStack([]); 
+    setRedoStack([]);
     // Clear redo stack on new input
 
     if (ensureZeroWidthDiv(target)) return;

@@ -3,6 +3,8 @@
  * @param {HTMLElement} target - The contentEditable element.
  * @returns {boolean} - Returns true if the placeholder was inserted, false otherwise.
  */
+import { generateBlockId } from "../utils/generateBlockIdUtil";
+
 export function ensureZeroWidthDiv(target) {
   if (
     target.childNodes.length === 0 ||
@@ -24,6 +26,35 @@ export function ensureZeroWidthDiv(target) {
     return true;
   }
   return false;
+}
+
+export function ensureZeroWidthDivAction(target) {
+  if (
+    target.childNodes.length === 0 ||
+    (target.childNodes.length === 1 &&
+      target.firstChild.nodeType === Node.ELEMENT_NODE &&
+      target.firstChild.textContent === "")
+  ) {
+    console.log("Inserting zero-width space div for action block");
+    target.innerHTML = "";
+    const div = document.createElement("div");
+    div.setAttribute("data-name", "action");
+    div.setAttribute("data-id", generateBlockId());
+    div.textContent = '\u200B';
+    div.style.textTransform = "none";
+    div.style.fontWeight = "normal";
+    div.style.paddingLeft = "0";
+    div.style.paddingRight = "0";
+    div.style.margin = "1"
+    target.appendChild(div);
+    // Place caret inside the new div
+    const range = document.createRange();
+    range.selectNodeContents(div);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
 }
 
 export function removeZeroWidthSpaceFromNode(currentNode, selection) {

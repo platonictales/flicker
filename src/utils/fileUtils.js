@@ -5,7 +5,7 @@ import { invoke } from '@tauri-apps/api/core';
 export function useAutoSaveBlocks(blocks, docId) {
   const timeout = useRef();
   useEffect(() => {
-    if (!blocks || !docId) return;
+    if (!!Array.isArray(blocks) || !docId) return;
     clearTimeout(timeout.current);
     timeout.current = setTimeout(async () => {
       await invoke('auto_save_blocks', { blocks, docId });
