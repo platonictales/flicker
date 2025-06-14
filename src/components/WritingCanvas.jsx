@@ -14,6 +14,7 @@ import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
 import { cleanupScreenplayBlocks, isCaretAtEnd } from "../utils/cleanUpOnEditUtils";
 import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
 import { handleSluglineSuggestions } from "../utils/sluglineSuggestionUtils";
+import { getCaretPosition, restoreCaret } from "../utils/undoRedoUtils";
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
 
@@ -37,7 +38,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
-  
+
   function enableSideDock() {
     setDocActive(!dockActive);
     if (focusMode) {
@@ -129,64 +130,20 @@ function WritingCanvas({ docId, loadedBlocks }) {
   // Debounced save on Enter key
   const enterSaveTimeout = useRef();
 
-  // --- Undo/Redo helpers ---
-  function getCaretPosition() {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return null;
-    const range = selection.getRangeAt(0);
-    return {
-      startContainerPath: getNodePath(range.startContainer, contentRef.current),
-      startOffset: range.startOffset,
-    };
-  }
-
-  function getNodePath(node, root) {
-    const path = [];
-    while (node && node !== root) {
-      let idx = 0;
-      let sibling = node;
-      while ((sibling = sibling.previousSibling)) idx++;
-      path.unshift(idx);
-      node = node.parentNode;
-    }
-    return path;
-  }
-
-function restoreCaret(caret) {
-  if (!caret) return;
-  let node = contentRef.current;
-  for (const idx of caret.startContainerPath) {
-    if (!node || !node.childNodes || !node.childNodes[idx]) {
-      node = null;
-      break;
-    }
-    node = node.childNodes[idx];
-  }
-  if (!node) return;
-  const maxOffset = node.nodeType === 3 ? node.length : node.childNodes.length;
-  const safeOffset = Math.min(caret.startOffset, maxOffset);
-  const range = document.createRange();
-  range.setStart(node, safeOffset);
-  range.collapse(true);
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
 
   const handleKeyDown = (e) => {
     const target = e.target;
 
-    // Undo (Ctrl+Z or Cmd+Z)
     if ((e.ctrlKey || e.metaKey) && e.key === "z") {
       e.preventDefault();
       setUndoStack(prev => {
         if (prev.length === 0) return prev;
         const last = prev[prev.length - 1];
-        setRedoStack(r => [...r, { blocks, caret: getCaretPosition() }]);
+        setRedoStack(r => [...r, { blocks, caret: getCaretPosition(contentRef) }]);
         setBlocks(last.blocks);
         if (contentRef.current) {
           contentRef.current.innerHTML = last.blocks.map(renderBlockDiv).join("");
-          restoreCaret(last.caret);
+          restoreCaret(last.caret, contentRef, setCaretToEnd);
         }
         return prev.slice(0, -1);
       });
@@ -194,16 +151,16 @@ function restoreCaret(caret) {
     }
 
     // Redo (Ctrl+Y or Cmd+Shift+Z)
-    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && (e.key === "Z"|| e.key === "z")))) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && (e.key === "Z" || e.key === "z")))) {
       e.preventDefault();
       setRedoStack(prev => {
         if (prev.length === 0) return prev;
         const last = prev[prev.length - 1];
-        setUndoStack(u => [...u, { blocks, caret: getCaretPosition() }]);
+        setUndoStack(u => [...u, { blocks, caret: getCaretPosition(contentRef) }]);
         setBlocks(last.blocks);
         if (contentRef.current) {
           contentRef.current.innerHTML = last.blocks.map(renderBlockDiv).join("");
-          restoreCaret(last.caret);
+          restoreCaret(last.caret, contentRef, setCaretToEnd);
         }
         return prev.slice(0, -1);
       });
@@ -299,10 +256,11 @@ function restoreCaret(caret) {
       ...prev,
       {
         blocks,
-        caret: getCaretPosition(),
+        caret: getCaretPosition(contentRef),
       },
     ]);
-    setRedoStack([]); // Clear redo stack on new input
+    setRedoStack([]); 
+    // Clear redo stack on new input
 
     if (ensureZeroWidthDiv(target)) return;
 
