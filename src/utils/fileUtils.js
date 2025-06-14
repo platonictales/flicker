@@ -5,10 +5,10 @@ import { invoke } from '@tauri-apps/api/core';
 export function useAutoSaveBlocks(blocks, docId) {
   const timeout = useRef();
   useEffect(() => {
-    if (!blocks || !docId) return;
+    if (!!Array.isArray(blocks) || !docId) return;
     clearTimeout(timeout.current);
-    timeout.current = setTimeout(() => {
-      invoke('auto_save_blocks', { blocks, docId });
+    timeout.current = setTimeout(async () => {
+      await invoke('auto_save_blocks', { blocks, docId });
     }, 800);
     return () => clearTimeout(timeout.current);
   }, [blocks, docId]);
@@ -29,3 +29,8 @@ export const renderBlockDiv = (block) => {
     .replace(/>/g, "&gt;")
     .replace(/\n/g, "<br>")}</div>`;
 };
+
+export async function fetchBlocksFromFile(docId) {
+  const jsonString = await invoke('read_blocks_file', { docId });
+  return JSON.parse(jsonString); // Should be an array of blocks
+}

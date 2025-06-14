@@ -88,12 +88,27 @@ fn generate_unique_doc_id() -> Result<String, String> {
     Ok(new_id)
 }
 
+#[tauri::command]
+fn read_blocks_file(doc_id: String) -> Result<String, String> {
+    // Build the path to the autosave file
+    let base_dir = data_dir().ok_or("No app data dir")?;
+    let app_dir = base_dir.join("flicker");
+    let path = app_dir.join(format!("autosave_{}.json", doc_id));
+    println!("reading from: {:?}", path); // <--- Add here
+
+    // Read the file contents
+    match fs::read_to_string(&path) {
+        Ok(content) => Ok(content),
+        Err(e) => Err(format!("Failed to read file: {}", e)),
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![greet, auto_save_blocks, generate_unique_doc_id, open_screenplay_file])
+        .invoke_handler(tauri::generate_handler![greet, auto_save_blocks, generate_unique_doc_id, open_screenplay_file, read_blocks_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -3,7 +3,7 @@ import WritingCanvas from "./components/WritingCanvas";
 import OpeningScreen from "./components/OpeningScreen";
 import React, { useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
-import { extractDocId } from './utils/saveUtils';
+import { extractDocId } from './utils/fileUtils';
 
 function App() {
   const [showCanvas, setShowCanvas] = useState(false);
