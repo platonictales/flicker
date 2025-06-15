@@ -10,6 +10,7 @@ function Canvas({
   focusMode,
   overlays,
   enableFocusMode,
+  changeTheme,
   containerRef,
   contentRef,
   focusModeStyle,
@@ -111,7 +112,7 @@ function Canvas({
 
   return (
     <div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
-      <QuickMenu onExport={handlePreview} onFocus={enableFocusMode} isFocusMode={focusMode} />
+      <QuickMenu onExport={handlePreview} onFocus={enableFocusMode} isFocusMode={focusMode} onThemeChange={changeTheme} />
       {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
       <div className="writing-canvas-container" ref={containerRef}>
         {!focusMode && overlays}

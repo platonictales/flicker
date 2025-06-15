@@ -31,6 +31,8 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const [dockActive, setDocActive] = useState(false);
 
+  const [theme, setTheme] = useState("light");
+
   const [sluglineSuggestionsList, setSluglineSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
@@ -38,6 +40,11 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
+
+  function changeTheme() {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+  }
 
   function enableSideDock() {
     setDocActive(!dockActive);
@@ -246,6 +253,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
         focusMode={focusMode}
         overlays={overlays}
         enableFocusMode={() => enableFocusMode()}
+        changeTheme={changeTheme}
         containerRef={containerRef}
         contentRef={contentRef}
         focusModeStyle={focusModeStyle}
