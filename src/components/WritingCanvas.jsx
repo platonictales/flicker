@@ -6,15 +6,15 @@ import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
 import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
 import { ensureZeroWidthDiv, ensureZeroWidthDivAction, removeZeroWidthSpaceFromNode } from "../utils/writingCanvasUtils";
-import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
+import { autoInsertParentheses, handleParentheticalTrigger } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
 import { sceneHeadings, transitions } from "./screenplayConstants";
 import { useAutoSaveBlocks, renderBlockDiv } from '../utils/fileUtils';
 import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
-import { cleanupScreenplayBlocks, isCaretAtEnd } from "../utils/cleanUpOnEditUtils";
 import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
 import { handleSluglineSuggestions } from "../utils/sluglineSuggestionUtils";
-import { getCaretPosition, restoreCaret } from "../utils/undoRedoUtils";
+import { getCaretPosition, handleRedo, handleUndo } from "../utils/undoRedoUtils";
+import { handleEnterKeyAction } from "../utils/screenplayUtils";
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
 
@@ -135,35 +135,31 @@ function WritingCanvas({ docId, loadedBlocks }) {
     const target = e.target;
     ensureZeroWidthDivAction(target)
 
+    // ...inside handleKeyDown...
     if ((e.ctrlKey || e.metaKey) && e.key === "z") {
       e.preventDefault();
-      setUndoStack(prev => {
-        if (prev.length === 0) return prev;
-        const last = prev[prev.length - 1];
-        setRedoStack(r => [...r, { blocks, caret: getCaretPosition(contentRef) }]);
-        setBlocks(last.blocks);
-        if (contentRef.current) {
-          contentRef.current.innerHTML = last.blocks.map(renderBlockDiv).join("");
-          restoreCaret(last.caret, contentRef, setCaretToEnd);
-        }
-        return prev.slice(0, -1);
+      handleUndo({
+        setUndoStack,
+        setRedoStack,
+        setBlocks,
+        contentRef,
+        blocks,
       });
       return;
     }
 
     // Redo (Ctrl+Y or Cmd+Shift+Z)
-    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && (e.key === "Z" || e.key === "z")))) {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      (e.key === "y" || (e.shiftKey && (e.key === "Z" || e.key === "z")))
+    ) {
       e.preventDefault();
-      setRedoStack(prev => {
-        if (prev.length === 0) return prev;
-        const last = prev[prev.length - 1];
-        setUndoStack(u => [...u, { blocks, caret: getCaretPosition(contentRef) }]);
-        setBlocks(last.blocks);
-        if (contentRef.current) {
-          contentRef.current.innerHTML = last.blocks.map(renderBlockDiv).join("");
-          restoreCaret(last.caret, contentRef, setCaretToEnd);
-        }
-        return prev.slice(0, -1);
+      handleRedo({
+        setRedoStack,
+        setUndoStack,
+        setBlocks,
+        contentRef,
+        blocks,
       });
       return;
     }
@@ -191,47 +187,18 @@ function WritingCanvas({ docId, loadedBlocks }) {
     }
 
     if (e.key === "Enter") {
-      const selection = window.getSelection();
-      if (!selection.rangeCount) return;
-
-      const range = selection.getRangeAt(0);
-      let currentNode = range.startContainer;
-      const text = currentNode.textContent || "";
-      const isUppercase = text === text.toUpperCase() && /[A-Z]/.test(text);
-      const isSlugLine = sceneHeadings.some(h => text.startsWith(h));
-      const isTransition = transitions.some(t => text.startsWith(t));
-      const isCharacterName = isUppercase && !isSlugLine && !isTransition;
-
-      currentNode = getParentElementNode(currentNode);
-      const name = currentNode.getAttribute("data-name");
-
-      if (isCharacterName) {
-        e.preventDefault();
-        characterAnticipateDialogue(currentNode, target, selection);
-      }
-
-      if (isTransition) {
-        e.preventDefault();
-        transitionAnticipateAction(currentNode, target, selection);
-      }
-
-      if (name === "parentheticals") {
-        e.preventDefault();
-        const parent = currentNode.parentNode;
-        createDialogueDivAndFocus(parent, selection);
-      }
-
-      clearTimeout(enterSaveTimeout.current);
-      enterSaveTimeout.current = setTimeout(() => {
-        import('@tauri-apps/api/core').then(({ invoke }) => {
-          invoke('auto_save_blocks', { blocks, docId });
-        });
-      }, 500);
-
-      if (contentRef.current && !isCaretAtEnd(contentRef.current)) {
-        cleanupScreenplayBlocks(contentRef.current);
-      }
+      handleEnterKeyAction({
+        e,
+        contentRef,
+        target,
+        sceneHeadings,
+        transitions,
+        enterSaveTimeout,
+        blocks,
+        docId,
+      });
     }
+
     if (focusMode) scrollCaretToCenter(containerRef, 0);
 
     if (
