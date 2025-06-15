@@ -15,6 +15,7 @@ import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
 import { handleSluglineSuggestions } from "../utils/sluglineSuggestionUtils";
 import { getCaretPosition, handleRedo, handleUndo, isUndoKey, isRedoKey } from "../utils/undoRedoUtils";
 import { handleEnterKeyAction } from "../utils/screenplayUtils";
+import { isPrintableKey } from "../utils/keyUtils";
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
 
@@ -197,13 +198,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
     if (focusMode) scrollCaretToCenter(containerRef, 0);
 
-    if (
-      e.key.length === 1 &&
-      !e.ctrlKey &&
-      !e.metaKey &&
-      !e.altKey &&
-      !e.shiftKey
-    ) {
+    if (isPrintableKey(e)) {
       handleModifiedCharacter();
     }
   };
