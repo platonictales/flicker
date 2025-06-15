@@ -4,17 +4,16 @@ import { filterOverlaysByActivePage } from "../utils/overlayUtils";
 import { getFocusModeStyle, scrollCaretToCenter, setCaretToEnd, updateBlockOpacities } from "../utils/focusModeUtils";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
-import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
-import { ensureZeroWidthDiv, ensureZeroWidthDivAction, removeZeroWidthSpaceFromNode } from "../utils/writingCanvasUtils";
+import { ensureSluglineClass } from "../utils/slugLineUtils";
+import { ensureZeroWidthDivAction } from "../utils/writingCanvasUtils";
 import { autoInsertParentheses, handleParentheticalTrigger } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
-import { sceneHeadings, transitions } from "./screenplayConstants";
+import { sceneHeadings } from "./screenplayConstants";
 import { useAutoSaveBlocks, renderBlockDiv } from '../utils/fileUtils';
 import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
 import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
-import { handleSluglineSuggestions } from "../utils/sluglineSuggestionUtils";
-import { getCaretPosition, handleRedo, handleUndo, isUndoKey, isRedoKey } from "../utils/undoRedoUtils";
-import { handleEnterKeyAction } from "../utils/screenplayUtils";
+import { handleRedo, handleUndo, isUndoKey, isRedoKey } from "../utils/undoRedoUtils";
+import { handleEnterKeyAction, handleEditorInput } from "../utils/screenplayUtils";
 import { isPrintableKey } from "../utils/keyUtils";
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
@@ -148,7 +147,6 @@ function WritingCanvas({ docId, loadedBlocks }) {
       return;
     }
 
-    // Redo (Ctrl+Y or Cmd+Shift+Z)
     if (isRedoKey(e)) {
       e.preventDefault();
       handleRedo({
@@ -189,7 +187,6 @@ function WritingCanvas({ docId, loadedBlocks }) {
         contentRef,
         target,
         sceneHeadings,
-        transitions,
         enterSaveTimeout,
         blocks,
         docId,
@@ -208,65 +205,19 @@ function WritingCanvas({ docId, loadedBlocks }) {
   }
 
   const handleInput = (e) => {
-    const target = e.target;
-
-    // --- UNDO: Save state and caret before updating blocks ---
-    setUndoStack(prev => [
-      ...prev,
-      {
-        blocks,
-        caret: getCaretPosition(contentRef),
-      },
-    ]);
-    setRedoStack([]);
-    // Clear redo stack on new input
-
-    if (ensureZeroWidthDiv(target)) return;
-
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const currentNode = range.startContainer;
-
-    removeZeroWidthSpaceFromNode(currentNode, selection);
-
-    if (isNodeEmpty(currentNode)) {
-      removeInlineTextStyles(currentNode);
-      setShowSuggestions(false);
-      return;
-    }
-
-    const textUpper = getTextContentUpper(currentNode);
-    const isSlugLine = sceneHeadings.includes(textUpper);
-    const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
-
-    if (isSlugLine) {
-      handleSluglineSuggestions({
-        textUpper,
-        blocks,
-        setSluglineSuggestions,
-        setShowSuggestions,
-        setSuggestionIndex,
-        setSuggestionPos,
-        contentRef,
-      });
-      replaceWithSluglineDiv(currentNode);
-    } else if (startsWithSlug) {
-      ensureSluglineClass(currentNode);
-    } else {
-      removeSluglineClass(currentNode);
-      setShowSuggestions(false)
-    }
-
-    const editor = e.target;
-    const newBlocks = Array.from(editor.children).map(div => ({
-      type: div.getAttribute('data-name'),
-      text: div.innerText
-    }));
-    setBlocks(newBlocks);
-  };
-
+  handleEditorInput({
+    e,
+    blocks,
+    setUndoStack,
+    setRedoStack,
+    contentRef,
+    setShowSuggestions,
+    setSluglineSuggestions,
+    setSuggestionIndex,
+    setSuggestionPos,
+    setBlocks,
+  });
+};
   // Only show overlays for the active page
   const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
 
