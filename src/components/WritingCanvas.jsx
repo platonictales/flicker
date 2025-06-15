@@ -13,7 +13,7 @@ import { useAutoSaveBlocks, renderBlockDiv } from '../utils/fileUtils';
 import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
 import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
 import { handleSluglineSuggestions } from "../utils/sluglineSuggestionUtils";
-import { getCaretPosition, handleRedo, handleUndo } from "../utils/undoRedoUtils";
+import { getCaretPosition, handleRedo, handleUndo, isUndoKey, isRedoKey } from "../utils/undoRedoUtils";
 import { handleEnterKeyAction } from "../utils/screenplayUtils";
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
@@ -135,8 +135,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
     const target = e.target;
     ensureZeroWidthDivAction(target)
 
-    // ...inside handleKeyDown...
-    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+    if (isUndoKey(e)) {
       e.preventDefault();
       handleUndo({
         setUndoStack,
@@ -149,10 +148,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
     }
 
     // Redo (Ctrl+Y or Cmd+Shift+Z)
-    if (
-      (e.ctrlKey || e.metaKey) &&
-      (e.key === "y" || (e.shiftKey && (e.key === "Z" || e.key === "z")))
-    ) {
+    if (isRedoKey(e)) {
       e.preventDefault();
       handleRedo({
         setRedoStack,

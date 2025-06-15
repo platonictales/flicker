@@ -1,6 +1,17 @@
 import { renderBlockDiv } from './fileUtils';
 import { setCaretToEnd } from "./focusModeUtils";
 
+export function isUndoKey(e) {
+  return (e.ctrlKey || e.metaKey) && e.key === "z";
+}
+
+export function isRedoKey(e) {
+  return (
+    (e.ctrlKey || e.metaKey) &&
+    (e.key === "y" || (e.shiftKey && (e.key === "Z" || e.key === "z")))
+  );
+}
+
 export function getNodePath(node, root) {
   const path = [];
   while (node && node !== root) {
