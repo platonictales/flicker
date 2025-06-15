@@ -31,6 +31,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const [dockActive, setDocActive] = useState(false);
 
+  const themeOptions = ["light", "dark", "solaris", "monokai"];
   const [theme, setTheme] = useState("light");
 
   const [sluglineSuggestionsList, setSluglineSuggestions] = useState([]);
@@ -42,8 +43,10 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const [redoStack, setRedoStack] = useState([]);
 
   function changeTheme() {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
+    setTheme(prev => {
+      const idx = themeOptions.indexOf(prev);
+      return themeOptions[(idx + 1) % themeOptions.length];
+    });
   }
 
   function enableSideDock() {
@@ -212,19 +215,19 @@ function WritingCanvas({ docId, loadedBlocks }) {
   }
 
   const handleInput = (e) => {
-  handleEditorInput({
-    e,
-    blocks,
-    setUndoStack,
-    setRedoStack,
-    contentRef,
-    setShowSuggestions,
-    setSluglineSuggestions,
-    setSuggestionIndex,
-    setSuggestionPos,
-    setBlocks,
-  });
-};
+    handleEditorInput({
+      e,
+      blocks,
+      setUndoStack,
+      setRedoStack,
+      contentRef,
+      setShowSuggestions,
+      setSluglineSuggestions,
+      setSuggestionIndex,
+      setSuggestionPos,
+      setBlocks,
+    });
+  };
   // Only show overlays for the active page
   const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
 
@@ -238,7 +241,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
     }));
 
   return (
-    <div className="writing-canvas-root">
+    <div className={`writing-canvas-root theme-${theme}`}>
       <SideDockNav
         focusMode={focusMode}
         dockActive={dockActive}

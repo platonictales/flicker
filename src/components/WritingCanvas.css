@@ -6,7 +6,6 @@
   position: relative;
   overflow-y: auto;
   /* Enable vertical scroll */
-
   scrollbar-width: none;
   /* Firefox */
   -ms-overflow-style: none;
@@ -38,6 +37,7 @@ body {
   min-height: 912px;
   max-height: none;
   color: #000;
+  background: #fff;
 }
 
 .writing-canvas>div {
@@ -160,7 +160,6 @@ body {
   height: 100vh;
   box-sizing: border-box;
   flex-shrink: 0;
-
   scrollbar-width: none;
   scrollbar-color: #bbb #f5f5f5;
 }
@@ -236,5 +235,157 @@ body {
   list-style: none;
   width: 200px;
   max-height: 100px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Dark theme styles */
+
+.theme-dark .writing-canvas-container {
+  background-color: #181818;
+  color: #f8f8f8;
+}
+
+.theme-dark .writing-canvas {
+  color: #f8f8f8;
+  background: #181818;
+}
+
+.theme-dark .sidedock-nav {
+  background: #181818;
+}
+
+.theme-dark .sidenav {
+  background: #232323;
+  scrollbar-color: #444 #181818;
+}
+
+.theme-dark .slugline-suggestions {
+  background: #232323;
+  border: 1px solid #444;
+  color: #f8f8f8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+}
+
+.theme-dark .sidenav li {
+  color: #f8f8f8;
+}
+
+.theme-dark .slugline-suggestions li.active {
+  background: #333;
+}
+
+.theme-dark .quick-menu {
+  color: #f8f8f8;
+  background: #181818;
+}
+
+.theme-dark .writing-canvas {
+  color: #f8f8f8;
+  background: #181818;
+}
+
+/* solaris theme */
+
+.theme-solaris .writing-canvas-container {
+  background-color: #fffbe6;
+  color: #5b4636;
+}
+
+.theme-solaris .writing-canvas {
+  color: #5b4636;
+  background: #fffbe6;
+}
+
+.theme-solaris .sidedock-nav {
+  background: #ffe9b3;
+}
+
+.theme-solaris .sidenav {
+  background: #ffe9b3;
+  scrollbar-color: #c9a14a #ffe9b3;
+}
+
+.theme-solaris .slugline-suggestions {
+  background: #fffbe6;
+  border: 1px solid #c9a14a;
+  color: #5b4636;
+  box-shadow: 0 2px 8px rgba(201, 161, 74, 0.16);
+}
+
+.theme-solaris .sidenav li {
+  color: #5b4636;
+}
+
+.theme-solaris .slugline-suggestions li.active {
+  background: #ffe9b3;
+}
+
+.theme-solaris .quick-menu {
+  color: #5b4636;
+  background: #fffbe6;
+}
+
+/* Monokai Dark Theme */
+.theme-monokai .writing-canvas-container {
+  background-color: #272822;
+  color: #f8f8f2;
+}
+
+.theme-monokai .writing-canvas {
+  color: #f8f8f2;
+  background: #272822;
+}
+
+.theme-monokai .sidedock-nav {
+  background: #272822;
+}
+
+.theme-monokai .sidenav {
+  background: #383830;
+  scrollbar-color: #75715e #272822;
+}
+
+.theme-monokai .slugline-suggestions {
+  background: #383830;
+  border: 1px solid #75715e;
+  color: #f8f8f2;
+  box-shadow: 0 2px 8px rgba(39, 40, 34, 0.32);
+}
+
+.theme-monokai .sidenav li {
+  color: #f8f8f2;
+}
+
+.theme-monokai .slugline-suggestions li.active {
+  background: #49483e;
+}
+
+.theme-monokai .quick-menu {
+  color: #f8f8f2;
+  background: #272822;
+}
+
+.theme-monokai .character {
+  color: #a6e22e;
+}
+
+.theme-monokai .parentheticals {
+  color: #fd971f;
+}
+
+.theme-monokai .slug-line,
+.theme-monokai .slugline {
+  color: #66d9ef;
+}
+
+.theme-monokai .dialogue {
+  color: #f92672;
+}
+
+.theme-monokai .action {
+  color: #f8f8f2;
+}
+
+.theme-monokai .transition {
+  color: #ae81ff;
 }
