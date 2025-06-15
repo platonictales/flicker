@@ -4,17 +4,17 @@ import { filterOverlaysByActivePage } from "../utils/overlayUtils";
 import { getFocusModeStyle, scrollCaretToCenter, setCaretToEnd, updateBlockOpacities } from "../utils/focusModeUtils";
 import { useRef, useEffect, useState } from "react";
 import { PAGE_HEIGHT } from "./constants";
-import { removeInlineTextStyles, replaceWithSluglineDiv, ensureSluglineClass, removeSluglineClass, isNodeEmpty, getTextContentUpper, getParentElementNode } from "../utils/slugLineUtils";
-import { ensureZeroWidthDiv, ensureZeroWidthDivAction, removeZeroWidthSpaceFromNode } from "../utils/writingCanvasUtils";
-import { characterAnticipateDialogue, autoInsertParentheses, createDialogueDivAndFocus, handleParentheticalTrigger, transitionAnticipateAction } from "../utils/dialogueUtils";
+import { ensureSluglineClass } from "../utils/slugLineUtils";
+import { ensureZeroWidthDivAction } from "../utils/writingCanvasUtils";
+import { autoInsertParentheses, handleParentheticalTrigger } from "../utils/dialogueUtils";
 import { handleModifiedCharacter } from "../utils/characterUtils";
-import { sceneHeadings, transitions } from "./screenplayConstants";
+import { sceneHeadings } from "./screenplayConstants";
 import { useAutoSaveBlocks, renderBlockDiv } from '../utils/fileUtils';
 import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
-import { cleanupScreenplayBlocks, isCaretAtEnd } from "../utils/cleanUpOnEditUtils";
 import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
-import { handleSluglineSuggestions } from "../utils/sluglineSuggestionUtils";
-import { getCaretPosition, restoreCaret } from "../utils/undoRedoUtils";
+import { handleRedo, handleUndo, isUndoKey, isRedoKey } from "../utils/undoRedoUtils";
+import { handleEnterKeyAction, handleEditorInput } from "../utils/screenplayUtils";
+import { isPrintableKey } from "../utils/keyUtils";
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
 
@@ -135,35 +135,26 @@ function WritingCanvas({ docId, loadedBlocks }) {
     const target = e.target;
     ensureZeroWidthDivAction(target)
 
-    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+    if (isUndoKey(e)) {
       e.preventDefault();
-      setUndoStack(prev => {
-        if (prev.length === 0) return prev;
-        const last = prev[prev.length - 1];
-        setRedoStack(r => [...r, { blocks, caret: getCaretPosition(contentRef) }]);
-        setBlocks(last.blocks);
-        if (contentRef.current) {
-          contentRef.current.innerHTML = last.blocks.map(renderBlockDiv).join("");
-          restoreCaret(last.caret, contentRef, setCaretToEnd);
-        }
-        return prev.slice(0, -1);
+      handleUndo({
+        setUndoStack,
+        setRedoStack,
+        setBlocks,
+        contentRef,
+        blocks,
       });
       return;
     }
 
-    // Redo (Ctrl+Y or Cmd+Shift+Z)
-    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.shiftKey && (e.key === "Z" || e.key === "z")))) {
+    if (isRedoKey(e)) {
       e.preventDefault();
-      setRedoStack(prev => {
-        if (prev.length === 0) return prev;
-        const last = prev[prev.length - 1];
-        setUndoStack(u => [...u, { blocks, caret: getCaretPosition(contentRef) }]);
-        setBlocks(last.blocks);
-        if (contentRef.current) {
-          contentRef.current.innerHTML = last.blocks.map(renderBlockDiv).join("");
-          restoreCaret(last.caret, contentRef, setCaretToEnd);
-        }
-        return prev.slice(0, -1);
+      handleRedo({
+        setRedoStack,
+        setUndoStack,
+        setBlocks,
+        contentRef,
+        blocks,
       });
       return;
     }
@@ -191,56 +182,20 @@ function WritingCanvas({ docId, loadedBlocks }) {
     }
 
     if (e.key === "Enter") {
-      const selection = window.getSelection();
-      if (!selection.rangeCount) return;
-
-      const range = selection.getRangeAt(0);
-      let currentNode = range.startContainer;
-      const text = currentNode.textContent || "";
-      const isUppercase = text === text.toUpperCase() && /[A-Z]/.test(text);
-      const isSlugLine = sceneHeadings.some(h => text.startsWith(h));
-      const isTransition = transitions.some(t => text.startsWith(t));
-      const isCharacterName = isUppercase && !isSlugLine && !isTransition;
-
-      currentNode = getParentElementNode(currentNode);
-      const name = currentNode.getAttribute("data-name");
-
-      if (isCharacterName) {
-        e.preventDefault();
-        characterAnticipateDialogue(currentNode, target, selection);
-      }
-
-      if (isTransition) {
-        e.preventDefault();
-        transitionAnticipateAction(currentNode, target, selection);
-      }
-
-      if (name === "parentheticals") {
-        e.preventDefault();
-        const parent = currentNode.parentNode;
-        createDialogueDivAndFocus(parent, selection);
-      }
-
-      clearTimeout(enterSaveTimeout.current);
-      enterSaveTimeout.current = setTimeout(() => {
-        import('@tauri-apps/api/core').then(({ invoke }) => {
-          invoke('auto_save_blocks', { blocks, docId });
-        });
-      }, 500);
-
-      if (contentRef.current && !isCaretAtEnd(contentRef.current)) {
-        cleanupScreenplayBlocks(contentRef.current);
-      }
+      handleEnterKeyAction({
+        e,
+        contentRef,
+        target,
+        sceneHeadings,
+        enterSaveTimeout,
+        blocks,
+        docId,
+      });
     }
+
     if (focusMode) scrollCaretToCenter(containerRef, 0);
 
-    if (
-      e.key.length === 1 &&
-      !e.ctrlKey &&
-      !e.metaKey &&
-      !e.altKey &&
-      !e.shiftKey
-    ) {
+    if (isPrintableKey(e)) {
       handleModifiedCharacter();
     }
   };
@@ -250,65 +205,19 @@ function WritingCanvas({ docId, loadedBlocks }) {
   }
 
   const handleInput = (e) => {
-    const target = e.target;
-
-    // --- UNDO: Save state and caret before updating blocks ---
-    setUndoStack(prev => [
-      ...prev,
-      {
-        blocks,
-        caret: getCaretPosition(contentRef),
-      },
-    ]);
-    setRedoStack([]);
-    // Clear redo stack on new input
-
-    if (ensureZeroWidthDiv(target)) return;
-
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const currentNode = range.startContainer;
-
-    removeZeroWidthSpaceFromNode(currentNode, selection);
-
-    if (isNodeEmpty(currentNode)) {
-      removeInlineTextStyles(currentNode);
-      setShowSuggestions(false);
-      return;
-    }
-
-    const textUpper = getTextContentUpper(currentNode);
-    const isSlugLine = sceneHeadings.includes(textUpper);
-    const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
-
-    if (isSlugLine) {
-      handleSluglineSuggestions({
-        textUpper,
-        blocks,
-        setSluglineSuggestions,
-        setShowSuggestions,
-        setSuggestionIndex,
-        setSuggestionPos,
-        contentRef,
-      });
-      replaceWithSluglineDiv(currentNode);
-    } else if (startsWithSlug) {
-      ensureSluglineClass(currentNode);
-    } else {
-      removeSluglineClass(currentNode);
-      setShowSuggestions(false)
-    }
-
-    const editor = e.target;
-    const newBlocks = Array.from(editor.children).map(div => ({
-      type: div.getAttribute('data-name'),
-      text: div.innerText
-    }));
-    setBlocks(newBlocks);
-  };
-
+  handleEditorInput({
+    e,
+    blocks,
+    setUndoStack,
+    setRedoStack,
+    contentRef,
+    setShowSuggestions,
+    setSluglineSuggestions,
+    setSuggestionIndex,
+    setSuggestionPos,
+    setBlocks,
+  });
+};
   // Only show overlays for the active page
   const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
 

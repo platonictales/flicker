@@ -13,6 +13,16 @@ export function isCaretAtEnd(editor) {
   );
 }
 
+function convertToActionBlock(el) {
+  if (!el) return;
+  el.setAttribute("data-name", "action");
+  el.style.textTransform = "none";
+  el.style.fontWeight = "normal";
+  el.style.paddingLeft = "0";
+  el.style.paddingRight = "0";
+  el.style.margin = "";
+}
+
 export function cleanupScreenplayBlocks(editor) {
   if (!editor) return;
   const blocks = Array.from(editor.children);
@@ -20,34 +30,41 @@ export function cleanupScreenplayBlocks(editor) {
   for (let i = 0; i < blocks.length - 1; i++) {
     const current = blocks[i];
     const next = blocks[i + 1];
+    const prev = blocks[i - 1];
     const currentType = current.getAttribute("data-name");
     const nextType = next.getAttribute("data-name");
+    const prevType = prev ? prev.getAttribute("data-name") : null;
 
     // No two character types adjacent
     if (currentType === "character" && nextType === "character") {
-      next.setAttribute("data-name", "action");
-      next.style.paddingLeft = "0";
-      next.style.paddingRight = "0";
+      convertToActionBlock(current);
     }
 
     // No two dialogue types adjacent
     if (currentType === "dialogue" && nextType === "dialogue") {
-      next.setAttribute("data-name", "action");
-      next.style.paddingLeft = "0";
-      next.style.paddingRight = "0";
+      convertToActionBlock(current);
     }
 
     // Parentheticals must be between character and dialogue
+    if (currentType === "parentheticals") {
+      if (prevType !== "character") {
+        convertToActionBlock(current);
+
+        continue; // No need to check nextType if already converted
+      }
+      if (nextType !== "dialogue") {
+        convertToActionBlock(current);
+        if (prevType === "character") {
+          convertToActionBlock(current);
+        }
+      }
+    }
+
     if (
-      nextType === "parentheticals" &&
-      !(currentType === "character" && blocks[i + 2] && blocks[i + 2].getAttribute("data-name") === "dialogue")
+      currentType === "dialogue" &&
+      !(prevType === "character" || prevType === "parentheticals")
     ) {
-      next.setAttribute("data-name", "action");
-      next.style.textTransform = "";
-      next.style.fontWeight = "";
-      next.style.paddingLeft = "0";
-      next.style.paddingRight = "0";
-      next.style.margin = "";
+      convertToActionBlock(current);
     }
   }
 }

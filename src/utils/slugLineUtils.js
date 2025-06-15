@@ -33,8 +33,7 @@ export function transformIntoActionNode(currentNode) {
     el.style.fontWeight = "normal";
     el.style.paddingLeft = "0";
     el.style.paddingRight = "0";
-    el.style.margin = "1"
-
+    el.style.margin = "";
   }
 }
 
