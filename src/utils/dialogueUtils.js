@@ -6,6 +6,7 @@ export function createDialogueDivAndFocus(target, selection) {
   newDiv.textContent = '\u200B';
   newDiv.setAttribute("data-name", "dialogue");
   newDiv.setAttribute("data-id", generateBlockId());
+  newDiv.className = "dialogue";
 
   newDiv.style.paddingLeft = "1in";
   newDiv.style.paddingRight = "1.5in";
@@ -39,6 +40,7 @@ export function createActionNode(target, selection) {
   newDiv.textContent = '\u200B';
   newDiv.setAttribute("data-name", "action");
   newDiv.setAttribute("data-id", generateBlockId());
+  newDiv.className = "action";
   newDiv.style.paddingLeft = "0";
   newDiv.style.paddingRight = "0";
   newDiv.style.marginBottom = "1";
@@ -60,6 +62,7 @@ export function characterAnticipateDialogue(currentNode, target, selection) {
   if (targetDiv) {
     targetDiv.setAttribute("data-name", "character");
     targetDiv.setAttribute("data-id", generateBlockId());
+    targetDiv.className = "character";
     targetDiv.style.paddingLeft = "2.2in";
     targetDiv.style.paddingRight = "0.5in";
     targetDiv.style.marginBottom = "0";
@@ -77,6 +80,7 @@ export function transitionAnticipateAction(currentNode, target, selection) {
   if (targetDiv) {
     targetDiv.setAttribute("data-name", "transition");
     targetDiv.setAttribute("data-id", generateBlockId());
+    targetDiv.className = "transition";
     targetDiv.style.paddingRight = "0in";
     targetDiv.style.marginBottom = "1";
     targetDiv.style.textAlign = "right";
@@ -101,6 +105,7 @@ export function transformIntoParentheticalNode(currentNode) {
   if (el) {
     el.setAttribute("data-name", "parentheticals");
     el.setAttribute("data-id", generateBlockId());
+    el.className = "parentheticals";
     el.style.textTransform = "none";
     el.style.fontWeight = "normal";
     el.style.paddingLeft = "1.6in";

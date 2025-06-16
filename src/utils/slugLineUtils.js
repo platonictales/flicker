@@ -14,7 +14,7 @@ export function removeInlineTextStyles(currentNode) {
   if (el) {
     el.setAttribute("data-name", "action");
     el.setAttribute("data-id", generateBlockId());
-
+    el.className = "action";
     el.style.textTransform = "none";
     el.style.fontWeight = "normal";
     el.style.paddingLeft = "0";
@@ -28,7 +28,7 @@ export function transformIntoActionNode(currentNode) {
   if (el) {
     el.setAttribute("data-name", "action");
     el.setAttribute("data-id", generateBlockId());
-
+    el.className = "action";
     el.style.textTransform = "none";
     el.style.fontWeight = "normal";
     el.style.paddingLeft = "0";
