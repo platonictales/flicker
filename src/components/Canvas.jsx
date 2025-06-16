@@ -75,7 +75,8 @@ function Canvas({
     blocks.forEach(block => {
       const newBlock = block.cloneNode(true);
       newBlock.setAttribute("data-id", generateBlockId());
-      // removeInlineStyles(newBlock); I removed the styles for some reason not sure why
+      removeInlineStyles(newBlock); 
+      // I removed the styles for some reason not sure why
 
       if (insertAfter && insertAfter.nextSibling) {
         contentRef.current.insertBefore(newBlock, insertAfter.nextSibling);
