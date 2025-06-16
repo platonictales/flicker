@@ -31,6 +31,9 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const [dockActive, setDocActive] = useState(false);
 
+  const themeOptions = ["light", "dark", "solaris", "monokai"];
+  const [theme, setTheme] = useState("light");
+
   const [sluglineSuggestionsList, setSluglineSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState(0);
@@ -38,6 +41,13 @@ function WritingCanvas({ docId, loadedBlocks }) {
 
   const [undoStack, setUndoStack] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
+
+  function changeTheme() {
+    setTheme(prev => {
+      const idx = themeOptions.indexOf(prev);
+      return themeOptions[(idx + 1) % themeOptions.length];
+    });
+  }
 
   function enableSideDock() {
     setDocActive(!dockActive);
@@ -205,19 +215,19 @@ function WritingCanvas({ docId, loadedBlocks }) {
   }
 
   const handleInput = (e) => {
-  handleEditorInput({
-    e,
-    blocks,
-    setUndoStack,
-    setRedoStack,
-    contentRef,
-    setShowSuggestions,
-    setSluglineSuggestions,
-    setSuggestionIndex,
-    setSuggestionPos,
-    setBlocks,
-  });
-};
+    handleEditorInput({
+      e,
+      blocks,
+      setUndoStack,
+      setRedoStack,
+      contentRef,
+      setShowSuggestions,
+      setSluglineSuggestions,
+      setSuggestionIndex,
+      setSuggestionPos,
+      setBlocks,
+    });
+  };
   // Only show overlays for the active page
   const overlays = filterOverlaysByActivePage(getPageOverlays(pageCount), activePage);
 
@@ -231,7 +241,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
     }));
 
   return (
-    <div className="writing-canvas-root">
+    <div className={`writing-canvas-root theme-${theme}`}>
       <SideDockNav
         focusMode={focusMode}
         dockActive={dockActive}
@@ -246,6 +256,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
         focusMode={focusMode}
         overlays={overlays}
         enableFocusMode={() => enableFocusMode()}
+        changeTheme={changeTheme}
         containerRef={containerRef}
         contentRef={contentRef}
         focusModeStyle={focusModeStyle}

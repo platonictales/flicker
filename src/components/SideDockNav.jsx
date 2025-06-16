@@ -12,7 +12,7 @@ function SideDockNav({
   return (
     <div>
       {!focusMode && (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", background: " #f5f5f5" }}>
+        <div className="sidedock-nav">
           <DockRightButton onClick={enableSideDock} />
         </div>
       )}

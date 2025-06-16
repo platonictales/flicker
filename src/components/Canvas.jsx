@@ -10,6 +10,7 @@ function Canvas({
   focusMode,
   overlays,
   enableFocusMode,
+  changeTheme,
   containerRef,
   contentRef,
   focusModeStyle,
@@ -31,7 +32,14 @@ function Canvas({
     setPdfBlob(blob);
     setShowPDF(true);
   };
-
+  function removeInlineStyles(node) {
+    if (node.nodeType === 1) {
+      node.removeAttribute('style');
+      for (let child of node.childNodes) {
+        removeInlineStyles(child);
+      }
+    }
+  }
   // Add this to your Canvas or editor component
   function handlePaste(e) {
     e.preventDefault();
@@ -67,6 +75,8 @@ function Canvas({
     blocks.forEach(block => {
       const newBlock = block.cloneNode(true);
       newBlock.setAttribute("data-id", generateBlockId());
+      removeInlineStyles(newBlock); 
+      // I removed the styles for some reason not sure why
 
       if (insertAfter && insertAfter.nextSibling) {
         contentRef.current.insertBefore(newBlock, insertAfter.nextSibling);
@@ -100,6 +110,7 @@ function Canvas({
       handleInput({ target: contentRef.current });
     }
   }
+
   function handleCut(e) {
     // Let the default cut happen first, then update state
     setTimeout(() => {
@@ -111,7 +122,7 @@ function Canvas({
 
   return (
     <div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
-      <QuickMenu onExport={handlePreview} onFocus={enableFocusMode} isFocusMode={focusMode} />
+      <QuickMenu onExport={handlePreview} onFocus={enableFocusMode} isFocusMode={focusMode} onThemeChange={changeTheme} />
       {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
       <div className="writing-canvas-container" ref={containerRef}>
         {!focusMode && overlays}

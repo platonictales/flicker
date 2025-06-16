@@ -35,7 +35,6 @@ export function ensureZeroWidthDivAction(target) {
       target.firstChild.nodeType === Node.ELEMENT_NODE &&
       target.firstChild.textContent === "")
   ) {
-    console.log("Inserting zero-width space div for action block");
     target.innerHTML = "";
     const div = document.createElement("div");
     div.setAttribute("data-name", "action");

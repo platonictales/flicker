@@ -5,7 +5,6 @@ export function FocusButton({ onClick }) {
       style={{
         background: 'none',
         border: 'none',
-
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',

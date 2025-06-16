@@ -3,10 +3,8 @@
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
-
   color: #0f0f0f;
   background-color: #fff;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -60,4 +58,21 @@ body {
 
 body.opening-screen-no-scroll {
   overflow: hidden;
+}
+
+.theme-dark {
+  color: #f8f8f8;
+  background-color: #181818;
+}
+
+/* solaris theme */
+.theme-solaris {
+  color: #5b4636;
+  background-color: #fffbe6;
+}
+
+/* monokai dark theme */
+.theme-monokai {
+  color: #f8f8f2;
+  background: #272822;
 }
