@@ -23,7 +23,6 @@ function SluglineSuggestions({
           key={suggestion + "-" + idx}
           className={idx === suggestionIndex ? "active" : ""}
           style={{
-            background: idx === suggestionIndex ? "#eee" : "#fff",
             cursor: "pointer",
           }}
           onMouseDown={() => onSelect(suggestion)}
