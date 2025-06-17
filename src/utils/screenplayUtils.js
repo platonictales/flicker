@@ -129,7 +129,7 @@ export function handleEditorInput({
   const editor = e.target;
   const newBlocks = Array.from(editor.children).map(div => ({
     type: div.getAttribute('data-name'),
-    text: div.innerText,
+    text: div.innerText.replace(/\u200B/g, ""),
   }));
   setBlocks(newBlocks);
 }

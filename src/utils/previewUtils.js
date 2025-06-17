@@ -22,14 +22,13 @@ export function generateScreenplayPDFBlob(blocks) {
         break;
       case 'character':
         font = 'bold';
-        x = 4.25;
-        maxWidth = 6;
-        align = 'center';
+        x = 3.7;
+        maxWidth = 1.8;
         break;
       case 'parentheticals':
         font = 'normal';
-        x = 2;
-        maxWidth = 4.5;
+        x = 3.1;
+        maxWidth = 2.4;
         break;
       case 'dialogue':
         font = 'normal';
