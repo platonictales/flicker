@@ -14,7 +14,7 @@ import { scrollToAndFocusBlock } from "../utils/sidenavUtils";
 import { insertSuggestionUtil } from "../utils/sluglineSuggestionUtils";
 import { handleRedo, handleUndo, isUndoKey, isRedoKey } from "../utils/undoRedoUtils";
 import { handleEnterKeyAction, handleEditorInput } from "../utils/screenplayUtils";
-import { isPrintableKey } from "../utils/keyUtils";
+import { isPrintableKey, handleBackspace, handleDelete } from "../utils/keyUtils";
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
 
@@ -144,6 +144,15 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const handleKeyDown = (e) => {
     const target = e.target;
     ensureZeroWidthDivAction(target)
+    
+    if (handleBackspace(e, contentRef)) {
+      e.preventDefault();
+      return;
+    }
+    if (handleDelete(e, contentRef)) {
+      e.preventDefault();
+      return;
+    }
 
     if (isUndoKey(e)) {
       e.preventDefault();
@@ -156,7 +165,6 @@ function WritingCanvas({ docId, loadedBlocks }) {
       });
       return;
     }
-
     if (isRedoKey(e)) {
       e.preventDefault();
       handleRedo({

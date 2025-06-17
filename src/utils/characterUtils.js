@@ -10,4 +10,7 @@ export function handleModifiedCharacter() {
   if (name === "character") {
     transformIntoActionNode(currentNode);
   }
+  if(name === "transition") {
+    transformIntoActionNode(currentNode);
+  }
 }
