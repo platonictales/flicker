@@ -34,6 +34,8 @@ export function transformIntoActionNode(currentNode) {
     el.style.paddingLeft = "0";
     el.style.paddingRight = "0";
     el.style.margin = "";
+    el.style.textAlign = "";
+    
   }
 }
 

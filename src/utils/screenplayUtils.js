@@ -23,7 +23,7 @@ export function handleEnterKeyAction({
   const text = currentNode.textContent || "";
   const isUppercase = text === text.toUpperCase() && /[A-Z]/.test(text);
   const isSlugLine = sceneHeadings.some(h => text.startsWith(h));
-  const isTransition = transitions.some(t => text.startsWith(t));
+  const isTransition = transitions.some(t => text === t);
   const isCharacterName = isUppercase && !isSlugLine && !isTransition;
 
   currentNode = getParentElementNode(currentNode);
@@ -97,6 +97,7 @@ export function handleEditorInput({
   }
 
   const textUpper = getTextContentUpper(currentNode);
+
   const isSlugLine = sceneHeadings.includes(textUpper);
   const startsWithSlug = sceneHeadings.some(h => textUpper.startsWith(h));
 
@@ -121,7 +122,7 @@ export function handleEditorInput({
   const editor = e.target;
   const newBlocks = Array.from(editor.children).map(div => ({
     type: div.getAttribute('data-name'),
-    text: div.innerText,
+    text: div.innerText.replace(/\u200B/g, ""),
   }));
   setBlocks(newBlocks);
 }

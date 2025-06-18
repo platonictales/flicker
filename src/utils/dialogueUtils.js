@@ -44,7 +44,24 @@ export function createActionNode(target, selection) {
   newDiv.style.paddingLeft = "0";
   newDiv.style.paddingRight = "0";
   newDiv.style.marginBottom = "1";
-  target.appendChild(newDiv);
+
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    let currentNode = range.startContainer;
+    while (currentNode && currentNode.nodeType !== 1) currentNode = currentNode.parentNode;
+    if (currentNode && currentNode.parentNode === target) {
+      if (currentNode.nextSibling) {
+        target.insertBefore(newDiv, currentNode.nextSibling);
+      } else {
+        target.appendChild(newDiv);
+      }
+    } else {
+      target.appendChild(newDiv);
+    }
+  } else {
+    target.appendChild(newDiv);
+  }
+
   const newRange = document.createRange();
   newRange.selectNodeContents(newDiv);
   newRange.collapse(false);
@@ -66,6 +83,7 @@ export function characterAnticipateDialogue(currentNode, target, selection) {
     targetDiv.style.paddingLeft = "2.2in";
     targetDiv.style.paddingRight = "0.5in";
     targetDiv.style.marginBottom = "0";
+    targetDiv.style.textAlign = "";
   }
   createDialogueDivAndFocus(target, selection);
 }
