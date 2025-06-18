@@ -42,7 +42,7 @@ export function cleanupScreenplayBlocks(editor) {
 
     // No two dialogue types adjacent
     if (currentType === "dialogue" && nextType === "dialogue") {
-      convertToActionBlock(current);
+      convertToActionBlock(next);
     }
 
     // Parentheticals must be between character and dialogue
