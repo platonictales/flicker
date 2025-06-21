@@ -38,21 +38,22 @@ function QuickMenu({ docId, fileLocation, onOpen, blocks, onExport, onFocus, isF
   return (
     <div className="quick-menu">
       <div className="dropdown" ref={menuRef} style={{ display: "inline-block", position: "relative" }}>
-        <button className="quick-menu-btn" style={{ width: "100%" }} onClick={() => setMenuOpen((open) => !open)}>
-          {docId || "File"} ▾
+        <button className="quick-menu-btn" onClick={() => setMenuOpen((open) => !open)}>
+          <span className="quick-menu-btn-label" title={docId || "File"}>{docId || "File"}</span>
+          <span className="quick-menu-btn-arrow">▾</span>
         </button>
         {menuOpen && (
           <div className="dropdown-menu">
             <button className="quick-menu-btn"
-              style={{ width: "100%" }} onClick={() => { setMenuOpen(false); onOpen && onOpen(); }}>Open</button>
+              onClick={() => { setMenuOpen(false); onOpen && onOpen(); }}>Open</button>
             <button className="quick-menu-btn"
-              style={{ width: "100%" }} onClick={() => { setMenuOpen(false); handleSaveAs(); }}>Save As</button>
+              onClick={() => { setMenuOpen(false); handleSaveAs(); }}>Save As</button>
           </div>
         )}
       </div>
       <div className="quick-menu-icons">
         <PreviewButton onClick={onExport} />
-        {isFocusMode ? <FocusButton onClick={onFocus} /> : <DiffuseButton onClick={onFocus} />}
+        {!isFocusMode ? <FocusButton onClick={onFocus} /> : <DiffuseButton onClick={onFocus} />}
         <ThemeButton onClick={onThemeChange} />
       </div>
     </div>

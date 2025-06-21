@@ -100,16 +100,32 @@ body {
 }
 
 .quick-menu-btn {
+  width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: transparent;
   color: inherit;
   border: none;
   font: inherit;
-  opacity: 0.8; /* Match the icon opacity */
+  opacity: 0.8;
   padding: 6px 16px;
   cursor: pointer;
   transition: background 0.2s, opacity 0.2s;
 }
 
+.quick-menu-btn-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.quick-menu-btn-arrow {
+  flex: 0 0 auto;
+  margin-left: 8px;
+}
 .dropdown-menu {
   background: #fff;
   color: #888;
@@ -119,6 +135,9 @@ body {
   left: 0;
   z-index: 1000;
   opacity: 0.98;
+  width: 150px;
+  min-width: 0;
+  box-sizing: border-box; 
 }
 
 .quick-menu-btn:hover,
@@ -301,7 +320,6 @@ body {
 .theme-dark .dropdown-menu {
   background: #181818;
   color: #f8f8f8;
-  border: 1px solid #444;
 }
 
 .theme-dark .writing-canvas-container {
@@ -364,7 +382,6 @@ body {
 .theme-solaris .dropdown-menu {
   background: #fffbe6;
   color: #5b4636;
-  border: 1px solid #ffe9b3;
 }
 
 .theme-solaris .writing-canvas-container {
@@ -421,7 +438,6 @@ body {
 .theme-monokai .dropdown-menu {
   background: #272822;
   color: #f8f8f2;
-  border: 1px solid #75715e;
 }
 
 .theme-monokai .writing-canvas-container {
