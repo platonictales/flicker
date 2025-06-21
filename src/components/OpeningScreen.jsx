@@ -24,7 +24,7 @@ function OpeningScreen({ onNew, onOpen }) {
           New
         </button>
         <button
-          onClick={onOpen}
+          onClick={() => onOpen()}
           style={{
             padding: "10px 20px",
             margin: "10px",

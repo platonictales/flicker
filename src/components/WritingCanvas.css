@@ -87,11 +87,16 @@ body {
   background: #ffffff;
   display: flex;
   position: fixed;
-  justify-content: flex-end;
+  justify-content: space-between;
   width: calc(50% + 54px);
   z-index: 1000;
   transition: opacity 0.2s;
   opacity: 0;
+}
+.quick-menu-icons {
+  display: flex;
+  gap: 12px; /* Adjust the gap as needed */
+  margin-left: 24px; /* This adds space between dropdown and icons */
 }
 
 .quick-menu-hover-container {

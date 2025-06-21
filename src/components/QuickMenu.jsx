@@ -4,15 +4,14 @@ import { FocusButton } from "./Focus";
 import { DiffuseButton } from "./Diffuse";
 import { ThemeButton } from "./Theme";
 import { invoke } from '@tauri-apps/api/core';
-import { extractDocId } from '../utils/fileUtils';
 
-function QuickMenu({ docId, onOpen, blocks, onExport, onFocus, isFocusMode, onThemeChange }) {
+function QuickMenu({ docId, fileLocation, onOpen, blocks, onExport, onFocus, isFocusMode, onThemeChange }) {
   const [selectValue, setSelectValue] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef();
   useEffect(() => {
     setSelectValue(""); // Always reset to "" when docId changes
-  }, [docId]);
+  }, [docId, fileLocation]);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -60,9 +59,12 @@ function QuickMenu({ docId, onOpen, blocks, onExport, onFocus, isFocusMode, onTh
           </div>
         )}
       </div>
+        <div className="quick-menu-icons">
+
       <PreviewButton onClick={onExport} />
       {isFocusMode ? <FocusButton onClick={onFocus} /> : <DiffuseButton onClick={onFocus} />}
       <ThemeButton onClick={onThemeChange} />
+      </div>
     </div>
   );
 }

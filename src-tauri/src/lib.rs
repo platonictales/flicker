@@ -4,12 +4,12 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-use std::sync::Mutex;
-use std::collections::HashMap;
-use once_cell::sync::Lazy;
 use dirs::data_dir;
-use serde::{Serialize, Deserialize};
+use once_cell::sync::Lazy;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fs;
+use std::sync::Mutex;
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 
@@ -23,8 +23,8 @@ pub struct Block {
 
 #[tauri::command]
 async fn open_screenplay_file(app: tauri::AppHandle) -> Result<(String, String), String> {
-    use std::sync::mpsc::channel;
     use std::fs;
+    use std::sync::mpsc::channel;
 
     let (tx, rx) = channel();
     app.dialog().file().pick_file(move |file_path| {
@@ -42,22 +42,24 @@ async fn open_screenplay_file(app: tauri::AppHandle) -> Result<(String, String),
             let _ = tx.send(Err("No file selected".to_string()));
         }
     });
-    rx.recv().unwrap_or_else(|_| Err("Dialog cancelled".to_string()))
+    rx.recv()
+        .unwrap_or_else(|_| Err("Dialog cancelled".to_string()))
 }
 
 use serde_json;
 
 #[tauri::command]
 async fn save_as_file(app: tauri::AppHandle, content: Vec<Block>) -> Result<String, String> {
-    use std::sync::mpsc::channel;
     use std::fs;
+    use std::sync::mpsc::channel;
 
     let json_string = serde_json::to_string(&content).map_err(|e| e.to_string())?;
 
     let (tx, rx) = channel();
     let content_clone = json_string.clone();
 
-    app.dialog().file()
+    app.dialog()
+        .file()
         .set_title("Save screenplay")
         .set_file_name("untitled.json")
         .save_file(move |file_path| {
@@ -80,22 +82,32 @@ async fn save_as_file(app: tauri::AppHandle, content: Vec<Block>) -> Result<Stri
         });
 
     tauri::async_runtime::spawn_blocking(move || {
-        rx.recv().unwrap_or_else(|_| Err("Dialog cancelled".to_string()))
+        rx.recv()
+            .unwrap_or_else(|_| Err("Dialog cancelled".to_string()))
     })
     .await
     .unwrap_or_else(|e| Err(format!("Task failed: {}", e)))
 }
 
 #[tauri::command]
-fn auto_save_blocks(blocks: Vec<Block>, doc_id: String) -> Result<(), String> {
+fn auto_save_blocks(
+    blocks: Vec<Block>,
+    doc_id: String,
+    fileLocation: Option<String>,
+) -> Result<(), String> {
     // Save to in-memory session
     let mut db = DB.lock().unwrap();
     db.insert(doc_id.clone(), blocks.clone());
+    println!("fileLocation: {:?}", fileLocation);
     // Also persist to disk (actual DB/file)
     let base_dir = data_dir().ok_or("No app data dir")?;
     let app_dir = base_dir.join("flicker");
-    let path = app_dir.join(format!("autosave_{}.json", doc_id));
-    println!("Saving to: {:?}", path); // <--- Add here
+    let path = if let Some(fp) = fileLocation {
+        std::path::PathBuf::from(fp)
+    } else {
+        std::fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
+        app_dir.join(format!("autosave_{}.json", doc_id))
+    };
 
     let data = serde_json::to_string(&blocks).map_err(|e| e.to_string())?;
     std::fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
@@ -115,7 +127,7 @@ fn generate_unique_doc_id() -> Result<String, String> {
             for entry in entries.flatten() {
                 if let Some(fname) = entry.file_name().to_str() {
                     if fname.starts_with(prefix) && fname.ends_with(ext) {
-                        let num_part = &fname[prefix.len()..fname.len()-ext.len()];
+                        let num_part = &fname[prefix.len()..fname.len() - ext.len()];
                         if let Ok(num) = num_part.parse::<u32>() {
                             if num > max_num {
                                 max_num = num;
@@ -146,16 +158,23 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
-        // Example: allow fullscreen and maximize
-          #[cfg(desktop)]
-          {
-          	let window = app.get_webview_window("main").unwrap();
-						window.maximize().unwrap(); 
-            window.set_maximizable(true).unwrap();
-          }
-        	Ok(())
-    		})
-        .invoke_handler(tauri::generate_handler![greet, auto_save_blocks, generate_unique_doc_id, open_screenplay_file, read_blocks_file, save_as_file])
+            // Example: allow fullscreen and maximize
+            #[cfg(desktop)]
+            {
+                let window = app.get_webview_window("main").unwrap();
+                window.maximize().unwrap();
+                window.set_maximizable(true).unwrap();
+            }
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            auto_save_blocks,
+            generate_unique_doc_id,
+            open_screenplay_file,
+            read_blocks_file,
+            save_as_file
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

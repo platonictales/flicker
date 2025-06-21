@@ -8,6 +8,7 @@ import { extractDocId } from './utils/fileUtils';
 function App() {
   const [showCanvas, setShowCanvas] = useState(false);
   const [docId, setDocId] = useState(null);
+  const [fileLocation, setFileLocation] = useState(null);
   const [loadedBlocks, setLoadedBlocks] = useState(null);
 
   // Prevent body scroll on openingscreen
@@ -32,25 +33,27 @@ function App() {
     }
   };
 
-const handleOpen = async (filePath) => {
-  if (filePath) {
-    const content = await invoke('read_blocks_file', { filePath });
-    setDocId(extractDocId(filePath));
-    setLoadedBlocks(JSON.parse(content));
-    setShowCanvas(true);
-  } else {
-    const [selectedPath, content] = await invoke('open_screenplay_file');
-    if (selectedPath && content) {
-      setDocId(extractDocId(selectedPath));
+  const handleOpen = async (filePath) => {
+    if (filePath) {
+      const content = await invoke('read_blocks_file', { filePath });
+      setFileLocation(filePath);
+      setDocId(extractDocId(filePath));
       setLoadedBlocks(JSON.parse(content));
       setShowCanvas(true);
+    } else {
+      const [selectedPath, content] = await invoke('open_screenplay_file');
+      if (selectedPath && content) {
+        setFileLocation(selectedPath);
+        setDocId(extractDocId(selectedPath));
+        setLoadedBlocks(JSON.parse(content));
+        setShowCanvas(true);
+      }
     }
-  }
-};
+  };
 
   let content;
-  if (showCanvas && docId) {
-    content = <WritingCanvas docId={docId} loadedBlocks={loadedBlocks} onOpen={handleOpen}/>;
+  if (showCanvas && (docId || fileLocation)) {
+    content = <WritingCanvas docId={docId} fileLocation={fileLocation} loadedBlocks={loadedBlocks} onOpen={handleOpen} />;
   } else {
     content = <OpeningScreen onNew={handleNew} onOpen={handleOpen} />;
   }
