@@ -32,25 +32,25 @@ function App() {
     }
   };
 
-  const handleOpen = async () => {
-    try {
-      const [filePath, content] = await invoke('open_screenplay_file');
-      if (filePath && content) {
-        const fileName = extractDocId(filePath);
-        setDocId(fileName);
-        setLoadedBlocks(JSON.parse(content));
-        setShowCanvas(true);
-      } else {
-        alert("No file selected.");
-      }
-    } catch (error) {
-      alert("Failed to open file: " + error);
+const handleOpen = async (filePath) => {
+  if (filePath) {
+    const content = await invoke('read_blocks_file', { filePath });
+    setDocId(extractDocId(filePath));
+    setLoadedBlocks(JSON.parse(content));
+    setShowCanvas(true);
+  } else {
+    const [selectedPath, content] = await invoke('open_screenplay_file');
+    if (selectedPath && content) {
+      setDocId(extractDocId(selectedPath));
+      setLoadedBlocks(JSON.parse(content));
+      setShowCanvas(true);
     }
-  };
+  }
+};
 
   let content;
   if (showCanvas && docId) {
-    content = <WritingCanvas docId={docId} loadedBlocks={loadedBlocks} />;
+    content = <WritingCanvas docId={docId} loadedBlocks={loadedBlocks} onOpen={handleOpen}/>;
   } else {
     content = <OpeningScreen onNew={handleNew} onOpen={handleOpen} />;
   }

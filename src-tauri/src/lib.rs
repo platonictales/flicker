@@ -45,6 +45,47 @@ async fn open_screenplay_file(app: tauri::AppHandle) -> Result<(String, String),
     rx.recv().unwrap_or_else(|_| Err("Dialog cancelled".to_string()))
 }
 
+use serde_json;
+
+#[tauri::command]
+async fn save_as_file(app: tauri::AppHandle, content: Vec<Block>) -> Result<String, String> {
+    use std::sync::mpsc::channel;
+    use std::fs;
+
+    let json_string = serde_json::to_string(&content).map_err(|e| e.to_string())?;
+
+    let (tx, rx) = channel();
+    let content_clone = json_string.clone();
+
+    app.dialog().file()
+        .set_title("Save screenplay")
+        .set_file_name("untitled.json")
+        .save_file(move |file_path| {
+            if let Some(mut path) = file_path.and_then(|fp| fp.as_path().map(|p| p.to_path_buf())) {
+                if path.extension().is_none() || path.extension().unwrap() != "json" {
+                    path.set_extension("json");
+                }
+
+                match fs::write(&path, &content_clone) {
+                    Ok(_) => {
+                        let _ = tx.send(Ok(path.display().to_string()));
+                    }
+                    Err(e) => {
+                        let _ = tx.send(Err(format!("Failed to save file: {}", e)));
+                    }
+                }
+            } else {
+                let _ = tx.send(Err("No file selected".to_string()));
+            }
+        });
+
+    tauri::async_runtime::spawn_blocking(move || {
+        rx.recv().unwrap_or_else(|_| Err("Dialog cancelled".to_string()))
+    })
+    .await
+    .unwrap_or_else(|e| Err(format!("Task failed: {}", e)))
+}
+
 #[tauri::command]
 fn auto_save_blocks(blocks: Vec<Block>, doc_id: String) -> Result<(), String> {
     // Save to in-memory session
@@ -90,15 +131,10 @@ fn generate_unique_doc_id() -> Result<String, String> {
 }
 
 #[tauri::command]
-fn read_blocks_file(doc_id: String) -> Result<String, String> {
-    // Build the path to the autosave file
-    let base_dir = data_dir().ok_or("No app data dir")?;
-    let app_dir = base_dir.join("flicker");
-    let path = app_dir.join(format!("autosave_{}.json", doc_id));
-    println!("reading from: {:?}", path); // <--- Add here
+fn read_blocks_file(file_path: String) -> Result<String, String> {
+    println!("reading from: {:?}", file_path);
 
-    // Read the file contents
-    match fs::read_to_string(&path) {
+    match std::fs::read_to_string(&file_path) {
         Ok(content) => Ok(content),
         Err(e) => Err(format!("Failed to read file: {}", e)),
     }
@@ -119,7 +155,7 @@ pub fn run() {
           }
         	Ok(())
     		})
-        .invoke_handler(tauri::generate_handler![greet, auto_save_blocks, generate_unique_doc_id, open_screenplay_file, read_blocks_file])
+        .invoke_handler(tauri::generate_handler![greet, auto_save_blocks, generate_unique_doc_id, open_screenplay_file, read_blocks_file, save_as_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -18,7 +18,7 @@ import { isPrintableKey, handleBackspace, handleDelete } from "../utils/keyUtils
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
 
-function WritingCanvas({ docId, loadedBlocks }) {
+function WritingCanvas({ docId, loadedBlocks, onOpen }) {
   const contentRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -260,6 +260,8 @@ function WritingCanvas({ docId, loadedBlocks }) {
       />
       {/* Main editor area */}
       <Canvas
+        docId={docId}
+        onOpen={onOpen}
         dockActive={dockActive}
         focusMode={focusMode}
         overlays={overlays}
