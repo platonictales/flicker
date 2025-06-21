@@ -1,14 +1,13 @@
-1. clone the project
 # Windows
 ### Install RustOpen PowerShell or CMD
 
 Run the official installer:
-
-1. open powershell
-2. curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-3. Allow it to run the vscode prereequisites
-4. cd into flicker
-5. npm install
-6. npm run tauri dev
+1. clone the project
+2. open powershell
+3. curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+4. Allow it to run the vscode prereequisites
+5. cd into flicker
+6. npm install
+7. npm run tauri dev
 
    Enjoy writing screenplays without any distractions. 
