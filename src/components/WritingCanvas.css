@@ -99,6 +99,34 @@ body {
   margin-left: 24px; /* This adds space between dropdown and icons */
 }
 
+.quick-menu-btn {
+  background: transparent;
+  color: inherit;
+  border: none;
+  font: inherit;
+  opacity: 0.8; /* Match the icon opacity */
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.dropdown-menu {
+  background: #fff;
+  color: #888;
+  font: inherit;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  opacity: 0.98;
+}
+
+.quick-menu-btn:hover,
+.quick-menu-btn:focus {
+  background: #f0f0f0; /* or match your icon hover bg */
+  opacity: 1;
+}
+
 .quick-menu-hover-container {
   height: 36px; 
   position: relative;
@@ -264,6 +292,17 @@ body {
 }
 
 /* Dark theme styles */
+.theme-dark .quick-menu-btn:hover,
+.theme-dark .quick-menu-btn:focus {
+  background: #232323;
+  opacity: 1;
+}
+
+.theme-dark .dropdown-menu {
+  background: #181818;
+  color: #f8f8f8;
+  border: 1px solid #444;
+}
 
 .theme-dark .writing-canvas-container {
   background-color: #181818;
@@ -316,6 +355,18 @@ body {
 
 /* solaris theme */
 
+.theme-solaris .quick-menu-btn:hover,
+.theme-solaris .quick-menu-btn:focus {
+  background: #ffe9b3;
+  opacity: 1;
+}
+
+.theme-solaris .dropdown-menu {
+  background: #fffbe6;
+  color: #5b4636;
+  border: 1px solid #ffe9b3;
+}
+
 .theme-solaris .writing-canvas-container {
   background-color: #fffbe6;
   color: #5b4636;
@@ -361,6 +412,18 @@ body {
 }
 
 /* Monokai Dark Theme */
+.theme-monokai .quick-menu-btn:hover,
+.theme-monokai .quick-menu-btn:focus {
+  background: #383830;
+  opacity: 1;
+}
+
+.theme-monokai .dropdown-menu {
+  background: #272822;
+  color: #f8f8f2;
+  border: 1px solid #75715e;
+}
+
 .theme-monokai .writing-canvas-container {
   background-color: #272822;
   color: #f8f8f2;
