@@ -75,7 +75,7 @@ function Canvas({
     blocks.forEach(block => {
       const newBlock = block.cloneNode(true);
       newBlock.setAttribute("data-id", generateBlockId());
-      removeInlineStyles(newBlock); 
+      removeInlineStyles(newBlock);
       // I removed the styles for some reason not sure why
 
       if (insertAfter && insertAfter.nextSibling) {
@@ -122,7 +122,9 @@ function Canvas({
 
   return (
     <div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
-      <QuickMenu onExport={handlePreview} onFocus={enableFocusMode} isFocusMode={focusMode} onThemeChange={changeTheme} />
+      <div className="quick-menu-hover-container">
+        <QuickMenu onExport={handlePreview} onFocus={enableFocusMode} isFocusMode={focusMode} onThemeChange={changeTheme} />
+      </div>
       {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
       <div className="writing-canvas-container" ref={containerRef}>
         {!focusMode && overlays}

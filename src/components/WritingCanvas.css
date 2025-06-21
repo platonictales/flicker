@@ -90,6 +90,20 @@ body {
   justify-content: flex-end;
   width: calc(50% + 54px);
   z-index: 1000;
+  transition: opacity 0.2s;
+  opacity: 0;
+}
+
+.quick-menu-hover-container {
+  height: 36px; 
+  position: relative;
+  z-index: 10;
+}
+
+.quick-menu-hover-container:hover .quick-menu,
+.quick-menu-hover-container:focus-within .quick-menu {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .character {
@@ -369,7 +383,7 @@ body {
 }
 
 .theme-monokai .sidenav li {
-    color: #66d9ef;
+  color: #66d9ef;
   background: transparent;
 }
 

@@ -1,7 +1,7 @@
 import "./App.css";
 import WritingCanvas from "./components/WritingCanvas";
 import OpeningScreen from "./components/OpeningScreen";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from '@tauri-apps/api/core';
 import { extractDocId } from './utils/fileUtils';
 

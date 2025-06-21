@@ -144,7 +144,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
   const handleKeyDown = (e) => {
     const target = e.target;
     ensureZeroWidthDivAction(target)
-    
+
     if (handleBackspace(e, contentRef)) {
       e.preventDefault();
       return;
