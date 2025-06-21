@@ -10,6 +10,8 @@ use once_cell::sync::Lazy;
 use dirs::data_dir;
 use serde::{Serialize, Deserialize};
 use std::fs;
+use tauri::Manager;
+use tauri_plugin_dialog::DialogExt;
 
 static DB: Lazy<Mutex<HashMap<String, Vec<Block>>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
@@ -18,7 +20,6 @@ pub struct Block {
     pub r#type: String,
     pub text: String,
 }
-use tauri_plugin_dialog::DialogExt;
 
 #[tauri::command]
 async fn open_screenplay_file(app: tauri::AppHandle) -> Result<(String, String), String> {
@@ -108,6 +109,16 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+        // Example: allow fullscreen and maximize
+          #[cfg(desktop)]
+          {
+          	let window = app.get_webview_window("main").unwrap();
+						window.maximize().unwrap(); 
+            window.set_maximizable(true).unwrap();
+          }
+        	Ok(())
+    		})
         .invoke_handler(tauri::generate_handler![greet, auto_save_blocks, generate_unique_doc_id, open_screenplay_file, read_blocks_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
