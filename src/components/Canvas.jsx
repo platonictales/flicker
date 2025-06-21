@@ -6,6 +6,9 @@ import { generateScreenplayPDFBlob } from "../utils/previewUtils";
 import { generateBlockId } from "../utils/generateBlockIdUtil";
 
 function Canvas({
+  docId,
+  fileLocation,
+  onOpen,
   dockActive,
   focusMode,
   overlays,
@@ -123,7 +126,7 @@ function Canvas({
   return (
     <div className={`main-content ${!dockActive ? 'shifted-left' : ''}`}>
       <div className="quick-menu-hover-container">
-        <QuickMenu onExport={handlePreview} onFocus={enableFocusMode} isFocusMode={focusMode} onThemeChange={changeTheme} />
+        <QuickMenu docId={docId} fileLocation={fileLocation} onOpen={onOpen} blocks={blocks} onExport={handlePreview} onFocus={enableFocusMode} isFocusMode={focusMode} onThemeChange={changeTheme} />
       </div>
       {showPDF && <PDFPreviewModal pdfBlob={pdfBlob} onClose={() => setShowPDF(false)} />}
       <div className="writing-canvas-container" ref={containerRef}>

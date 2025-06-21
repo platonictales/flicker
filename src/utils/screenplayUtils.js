@@ -13,7 +13,8 @@ export function handleEnterKeyAction({
   sceneHeadings,
   enterSaveTimeout,
   blocks,
-  docId
+  docId,
+  fileLocation,
 }) {
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
@@ -48,7 +49,7 @@ export function handleEnterKeyAction({
   clearTimeout(enterSaveTimeout.current);
   enterSaveTimeout.current = setTimeout(() => {
     import('@tauri-apps/api/core').then(({ invoke }) => {
-      invoke('auto_save_blocks', { blocks, docId });
+      invoke('auto_save_blocks', { blocks, docId, fileLocation });
     });
   }, 500);
 

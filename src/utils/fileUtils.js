@@ -2,13 +2,13 @@ import { useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 
 // Debounced auto-save hook
-export function useAutoSaveBlocks(blocks, docId) {
+export function useAutoSaveBlocks(blocks, docId, fileLocation) {
   const timeout = useRef();
   useEffect(() => {
     if (!!Array.isArray(blocks) || !docId) return;
     clearTimeout(timeout.current);
     timeout.current = setTimeout(async () => {
-      await invoke('auto_save_blocks', { blocks, docId });
+      await invoke('auto_save_blocks', { blocks, docId, fileLocation });
     }, 800);
     return () => clearTimeout(timeout.current);
   }, [blocks, docId]);

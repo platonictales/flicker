@@ -18,7 +18,7 @@ import { isPrintableKey, handleBackspace, handleDelete } from "../utils/keyUtils
 import SideDockNav from "./SideDockNav";
 import Canvas from "./Canvas";
 
-function WritingCanvas({ docId, loadedBlocks }) {
+function WritingCanvas({ docId, fileLocation, loadedBlocks, onOpen }) {
   const contentRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -56,7 +56,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
     }
   }
 
-  useAutoSaveBlocks(blocks, docId);
+  useAutoSaveBlocks(blocks, docId, fileLocation);
 
   useEffect(() => {
     const updatePageCount = () => {
@@ -208,6 +208,7 @@ function WritingCanvas({ docId, loadedBlocks }) {
         enterSaveTimeout,
         blocks,
         docId,
+        fileLocation
       });
     }
 
@@ -260,6 +261,9 @@ function WritingCanvas({ docId, loadedBlocks }) {
       />
       {/* Main editor area */}
       <Canvas
+        docId={docId}
+        fileLocation={fileLocation}
+        onOpen={onOpen}
         dockActive={dockActive}
         focusMode={focusMode}
         overlays={overlays}
