@@ -32,7 +32,7 @@ function WritingCanvas({ docId, fileLocation, loadedBlocks, onOpen }) {
   const [dockActive, setDocActive] = useState(false);
 
   const themeOptions = ["light", "dark", "solaris", "monokai"];
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState("dark");
 
   const [sluglineSuggestionsList, setSluglineSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);

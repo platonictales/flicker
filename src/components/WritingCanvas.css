@@ -203,6 +203,8 @@ body {
   overflow: hidden;
   /* Center the content horizontally */
   align-items: flex-start;
+    caret-color: #ff9900; /* Pulp Fiction yellow, or any color you want */
+
 }
 
 .main-content {

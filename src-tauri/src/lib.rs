@@ -101,7 +101,7 @@ fn auto_save_blocks(
     println!("fileLocation: {:?}", fileLocation);
     // Also persist to disk (actual DB/file)
     let base_dir = data_dir().ok_or("No app data dir")?;
-    let app_dir = base_dir.join("flicker");
+    let app_dir = base_dir.join("macguffin");
     let path = if let Some(fp) = fileLocation {
         std::path::PathBuf::from(fp)
     } else {
@@ -118,7 +118,7 @@ fn auto_save_blocks(
 #[tauri::command]
 fn generate_unique_doc_id() -> Result<String, String> {
     let base_dir = data_dir().ok_or("No app data dir")?;
-    let app_dir = base_dir.join("flicker");
+    let app_dir = base_dir.join("macguffin");
     let prefix = "autosave_screenplay-";
     let ext = ".json";
     let mut max_num = 0;
